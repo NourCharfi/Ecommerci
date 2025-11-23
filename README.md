@@ -1,23 +1,23 @@
-# ECommerci.tn – Plateforme E?Commerce ASP.NET Core (.NET 8)
+# ECommerci.tn â€“ Plateforme ECommerce ASP.NET Core (.NET 8)
 
-## 1. Vue d’ensemble
-Solution e?commerce moderne en ASP.NET Core (.NET 8) avec identité, gestion produits, panier, commandes, paiements Stripe, promotions, notifications temps réel, audit et tableau de bord administrateur. Interface et messages en français.
+## 1. Vue dâ€™ensemble
+Solution e?commerce moderne en ASP.NET Core (.NET 8) avec identitÃ©, gestion produits, panier, commandes, paiements Stripe, promotions, notifications temps rÃ©el, audit et tableau de bord administrateur. Interface et messages en franÃ§ais.
 
-## 2. Principales fonctionnalités
-- Authentification & rôles (Admin, Manager, User) via ASP.NET Core Identity
-- Inscription avec nom d’utilisateur + email, profil modifiable (email, username, téléphone, mot de passe optionnel)
-- Gestion produits (CRUD, image, catégories, stock, corbeille)
+## 2. Principales fonctionnalitÃ©s
+- Authentification & rÃ´les (Admin, Manager, User) via ASP.NET Core Identity
+- Inscription avec nom dâ€™utilisateur + email, profil modifiable (email, username, tÃ©lÃ©phone, mot de passe optionnel)
+- Gestion produits (CRUD, image, catÃ©gories, stock, corbeille)
 - Panier dynamique + calcul remises + livraison
 - Commandes (infos client, suivi statut, impression facture, historique)
-- Paiements Stripe (Checkout) + mode manuel de test (simulation) + annulation / succès
-- Système de promotions (pourcentage, livraison gratuite, frais) + badge visuel + résumé sur panier
-- Notifications temps réel (SignalR / hub) + cloche + page dédiée + marquage “lu” / “tout lire”
-- Audit log (actions CRUD, suppression, création promotions, etc.) avec stockage des anciennes valeurs
-- Tableau de bord Admin / Manager (statistiques, stocks faibles, commandes récentes, activités)
-- Gestion rôles & utilisateurs (création, édition, réinitialisation mot de passe, suppression)
+- Paiements Stripe (Checkout) + mode manuel de test (simulation) + annulation / succÃ¨s
+- SystÃ¨me de promotions (pourcentage, livraison gratuite, frais) + badge visuel + rÃ©sumÃ© sur panier
+- Notifications temps rÃ©el (SignalR / hub) + cloche + page dÃ©diÃ©e + marquage â€œluâ€ / â€œtout lireâ€
+- Audit log (actions CRUD, suppression, crÃ©ation promotions, etc.) avec stockage des anciennes valeurs
+- Tableau de bord Admin / Manager (statistiques, stocks faibles, commandes rÃ©centes, activitÃ©s)
+- Gestion rÃ´les & utilisateurs (crÃ©ation, Ã©dition, rÃ©initialisation mot de passe, suppression)
 - Stock & alertes (faible, rupture)
 - Recherche produits + historique recherche utilisateur
-- Impression commande (vue dédiée optimisée print)
+- Impression commande (vue dÃ©diÃ©e optimisÃ©e print)
 
 ## 3. Pile technologique
 | Domaine | Outils |
@@ -25,28 +25,28 @@ Solution e?commerce moderne en ASP.NET Core (.NET 8) avec identité, gestion prod
 | Backend | ASP.NET Core .NET 8, MVC/Razor Views |
 | Auth | ASP.NET Core Identity |
 | DB | SQL Server LocalDB (migrations EF Core) |
-| Temps réel | SignalR Hub Notifications |
-| Paiement | Stripe Checkout (clé publique/privée) |
+| Temps rÃ©el | SignalR Hub Notifications |
+| Paiement | Stripe Checkout (clÃ© publique/privÃ©e) |
 | Front | Bootstrap 5, Font Awesome, Chart.js, DataTables, JS custom |
 | Logs & Audit | EF + tables AuditLog |
 
-## 4. Structure — dossiers clés
-- `Controllers/` : logique MVC (Account, Product, Panier, Orders, Payment, Discount, Dashboard…)
-- `Models/` : entités (Product, Category, Orders, Discount, Notification, AuditLog...)
-- `ViewModels/` : modèles de transfert (auth, dashboard, panier, promotion…)
+## 4. Structure â€” dossiers clÃ©s
+- `Controllers/` : logique MVC (Account, Product, Panier, Orders, Payment, Discount, Dashboardâ€¦)
+- `Models/` : entitÃ©s (Product, Category, Orders, Discount, Notification, AuditLog...)
+- `ViewModels/` : modÃ¨les de transfert (auth, dashboard, panier, promotionâ€¦)
 - `Views/` : Razor Views (Layout, Partials, Components)
-- `Services/` : services métier (DiscountService, NotificationService, StripePaymentService, EmailService)
+- `Services/` : services mÃ©tier (DiscountService, NotificationService, StripePaymentService, EmailService)
 - `wwwroot/js|css` : scripts (notifications, datatables, currency formatter), styles, images
-- `Migrations/` : migrations EF Core (évolution schéma)
+- `Migrations/` : migrations EF Core (Ã©volution schÃ©ma)
 
 ## 5. Mise en route
-### Prérequis
+### PrÃ©requis
 - .NET 8 SDK
 - SQL Server / LocalDB
-- Clés Stripe (Dashboard Stripe > Developers > API keys)
+- ClÃ©s Stripe (Dashboard Stripe > Developers > API keys)
 
-### Étapes
-1. Cloner le dépôt
+### Ã‰tapes
+1. Cloner le dÃ©pÃ´t
 2. Configurer `appsettings.Development.json` :
 ```json
 "ConnectionStrings": {"DefaultConnection": "Server=(localdb)\\mssqllocaldb;Database=ECommerciDb;Trusted_Connection=True;"},
@@ -65,56 +65,56 @@ dotnet ef database update
 ```
 dotnet run
 ```
-6. Créer les rôles (une fois) — exemple rapide (à adapter / seed) :
+6. CrÃ©er les rÃ´les (une fois) â€” exemple rapide (Ã  adapter / seed) :
 ```csharp
 await roleManager.CreateAsync(new IdentityRole("Admin"));
 await roleManager.CreateAsync(new IdentityRole("Manager"));
 await roleManager.CreateAsync(new IdentityRole("User"));
 ```
-7. Créer un utilisateur admin et lui attribuer le rôle.
+7. CrÃ©er un utilisateur admin et lui attribuer le rÃ´le.
 
 ## 6. Configuration & variables
-| Clé | Description |
+| ClÃ© | Description |
 |-----|-------------|
-| Stripe:PublicKey | Clé publique pour Checkout |
-| Stripe:SecretKey | Clé secrète paiement |
+| Stripe:PublicKey | ClÃ© publique pour Checkout |
+| Stripe:SecretKey | ClÃ© secrÃ¨te paiement |
 | ASPNETCORE_ENVIRONMENT | Development / Production |
 
-## 7. Sécurité / Bonnes pratiques
-- Ne pas committer les clés Stripe réelles.
+## 7. SÃ©curitÃ© / Bonnes pratiques
+- Ne pas committer les clÃ©s Stripe rÃ©elles.
 - Forcer HTTPS (en production).
-- Vérifier validation côté serveur pour promo & paiement.
-- Mettre en place rate?limiting sur endpoints sensibles si exposé public.
-- Journaliser erreurs critiques (Serilog recommandé en évolution).
+- VÃ©rifier validation cÃ´tÃ© serveur pour promo & paiement.
+- Mettre en place rate?limiting sur endpoints sensibles si exposÃ© public.
+- Journaliser erreurs critiques (Serilog recommandÃ© en Ã©volution).
 
-## 8. Paiement Stripe — flux
-1. Création Session Checkout (POST serveur `/Payment/CreateCheckoutSession`)
-2. Redirection Stripe hébergée
-3. Webhook (à implémenter en production) pour validation définitive
-4. Mise à jour statut commande (Paid / Confirmed / Delivered)
+## 8. Paiement Stripe â€” flux
+1. CrÃ©ation Session Checkout (POST serveur `/Payment/CreateCheckoutSession`)
+2. Redirection Stripe hÃ©bergÃ©e
+3. Webhook (Ã  implÃ©menter en production) pour validation dÃ©finitive
+4. Mise Ã  jour statut commande (Paid / Confirmed / Delivered)
 
 ## 9. Promotions / Discounts
-- Type % : réduction sur prix unitaire
+- Type % : rÃ©duction sur prix unitaire
 - Livraison gratuite : remplace frais par 0
-- Logiciel calcule prix réduit + économies par ligne
-- Panneau admin: création, modification, activation/désactivation, suppression
+- Logiciel calcule prix rÃ©duit + Ã©conomies par ligne
+- Panneau admin: crÃ©ation, modification, activation/dÃ©sactivation, suppression
 
-## 10. Notifications temps réel
+## 10. Notifications temps rÃ©el
 - Hub SignalR push nouvelles notifications (ex: nouveau user, commande)
-- Dropdown + page liste avec filtres (lues / non lues / catégories)
+- Dropdown + page liste avec filtres (lues / non lues / catÃ©gories)
 - API endpoints lecture / marquer tout comme lu
 
 ## 11. Audit Log
 - Stocke : ActionType, EntityType, EntityId, EntityName, OldValues, NewValues, User, IP, Timestamp
-- Utilisé pour traçabilité (suppression produit, modification promo, etc.)
+- UtilisÃ© pour traÃ§abilitÃ© (suppression produit, modification promo, etc.)
 
 ## 12. Impression commande
-- Vue `Orders/Print.cshtml` sans layout, CSS optimisé pour A4
+- Vue `Orders/Print.cshtml` sans layout, CSS optimisÃ© pour A4
 - Totaux + adresse + statut
 
 ## 13. Internationalisation / langue
-- Interface FR (libellés nettoyés — suppression caractères mal encodés)
-- Possibilité future : resx / IStringLocalizer si multi?langue requis.
+- Interface FR (libellÃ©s nettoyÃ©s â€” suppression caractÃ¨res mal encodÃ©s)
+- PossibilitÃ© future : resx / IStringLocalizer si multi?langue requis.
 
 ## 14. Extension future
 - Webhooks Stripe (paiement asynchrone)
@@ -136,12 +136,12 @@ await roleManager.CreateAsync(new IdentityRole("User"));
 | Migrations (update) | `dotnet ef database update` |
 | Lancer appli | `dotnet run` |
 
-## 17. Résolution problèmes courants
-| Problème | Solution rapide |
+## 17. RÃ©solution problÃ¨mes courants
+| ProblÃ¨me | Solution rapide |
 |----------|----------------|
-| Caractères "??" | Fichiers encodés ISO ? sauvegarder UTF?8 sans BOM |
-| Erreur paiement Stripe 404/415 | Vérifier URL endpoint & headers JSON |
-| Images non affichées | Vérifier chemin `wwwroot/images/` & droits fichier |
-| Notifications non push | Vérifier hub SignalR + JS côté client (console) |
-| Statuts commande incohérents | Vérifier enum `OrderStatus` & logique mise à jour |
+| CaractÃ¨res "??" | Fichiers encodÃ©s ISO ? sauvegarder UTF?8 sans BOM |
+| Erreur paiement Stripe 404/415 | VÃ©rifier URL endpoint & headers JSON |
+| Images non affichÃ©es | VÃ©rifier chemin `wwwroot/images/` & droits fichier |
+| Notifications non push | VÃ©rifier hub SignalR + JS cÃ´tÃ© client (console) |
+| Statuts commande incohÃ©rents | VÃ©rifier enum `OrderStatus` & logique mise Ã  jour |
 
