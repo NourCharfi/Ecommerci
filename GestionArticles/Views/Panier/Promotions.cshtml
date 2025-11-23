@@ -1,0 +1,165 @@
+@{
+    ViewData["Title"] = "Promotions Actuelles";
+}
+
+@inject GestionArticles.Services.IDiscountService DiscountService
+@inject GestionArticles.Models.Repositories.IDiscountRepository DiscountRepository
+
+<div class="container-fluid py-4">
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white;">
+                    <h2 class="mb-0">
+                        <i class="fas fa-star me-2"></i>?? Toutes les Promotions Actuelles
+                    </h2>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    @{
+        var allDiscounts = DiscountRepository.GetAll() ?? new List<GestionArticles.Models.Promotions.Discount>();
+        var activeDiscounts = allDiscounts
+            .Where(d => d.IsActive && d.StartDate <= DateTime.Now && d.EndDate >= DateTime.Now)
+            .ToList();
+    }
+
+    @if (activeDiscounts.Count > 0)
+    {
+        <!-- Cards View of Active Promotions -->
+        <div class="row">
+            @foreach (var discount in activeDiscounts)
+            {
+                var daysRemaining = (int)(discount.EndDate - DateTime.Now).TotalDays;
+                var badgeColor = daysRemaining <= 3 ? "danger" : daysRemaining <= 7 ? "warning" : "success";
+                var badgeText = daysRemaining <= 0 ? "Expire aujourd'hui" : $"{daysRemaining}j restant(s)";
+
+                <div class="col-md-6 col-lg-4 mb-4">
+                    <div class="card h-100 shadow-sm" style="border-top: 4px solid #667eea;">
+                        <div class="card-header bg-light">
+                            <div class="d-flex justify-content-between align-items-start">
+                                <h5 class="mb-0">@discount.Description</h5>
+                                <span class="badge bg-@badgeColor">@badgeText</span>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <!-- Promo Type Details -->
+                            <div class="alert alert-info mb-3">
+                                @if (discount.Type == GestionArticles.Models.Promotions.DiscountType.Percentage)
+                                {
+                                    <h6 class="mb-0">
+                                        <i class="fas fa-percentage me-2"></i>
+                                        Réduction: <strong>-@discount.Value%</strong>
+                                    </h6>
+                                }
+                                else if (discount.Type == GestionArticles.Models.Promotions.DiscountType.FreeShipping)
+                                {
+                                    <h6 class="mb-0">
+                                        <i class="fas fa-truck me-2"></i>
+                                        <strong>Livraison gratuite</strong>
+                                    </h6>
+                                }
+                                else
+                                {
+                                    <h6 class="mb-0">
+                                        <i class="fas fa-tag me-2"></i>
+                                        <strong>Réduction: -@discount.Value DT</strong>
+                                    </h6>
+                                }
+                            </div>
+                            
+                            <p class="text-muted small">
+                                <i class="fas fa-calendar me-1"></i>
+                                Du @discount.StartDate.ToString("dd/MM/yyyy") au @discount.EndDate.ToString("dd/MM/yyyy")
+                            </p>
+                        </div>
+                        <div class="card-footer bg-light">
+                            <small class="text-muted">
+                                Status: <span class="badge bg-success">Active</span>
+                            </small>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+    else
+    {
+        <div class="alert alert-warning text-center">
+            <i class="fas fa-info-circle me-2"></i>
+            <strong>Aucune promotion active actuellement</strong>
+        </div>
+    }
+
+    <!-- All Discounts DataTable -->
+    <div class="row mt-5">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white;">
+                    <h5 class="mb-0">
+                        <i class="fas fa-table me-2"></i>Toutes les Promotions
+                    </h5>
+                </div>
+                <div class="table-responsive">
+                    <table class="table table-hover datatable">
+                        <thead class="table-light">
+                            <tr>
+                                <th><i class="fas fa-tag me-1"></i>Description</th>
+                                <th><i class="fas fa-list me-1"></i>Type</th>
+                                <th><i class="fas fa-coins me-1"></i>Valeur</th>
+                                <th><i class="fas fa-calendar me-1"></i>Dates</th>
+                                <th><i class="fas fa-flag me-1"></i>Statut</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var discount in allDiscounts)
+                            {
+                                var isActive = discount.IsActive && discount.StartDate <= DateTime.Now && discount.EndDate >= DateTime.Now;
+                                var isExpired = discount.EndDate < DateTime.Now;
+                                var statusBadge = isActive ? "success" : isExpired ? "danger" : "warning";
+                                var statusText = isActive ? "Active" : isExpired ? "Expirée" : "À venir";
+
+                                <tr>
+                                    <td><strong>@discount.Description</strong></td>
+                                    <td>
+                                        <span class="badge bg-info">@discount.Type</span>
+                                    </td>
+                                    <td>
+                                        @if (discount.Type == GestionArticles.Models.Promotions.DiscountType.Percentage)
+                                        {
+                                            <span>-@discount.Value%</span>
+                                        }
+                                        else if (discount.Type == GestionArticles.Models.Promotions.DiscountType.FreeShipping)
+                                        {
+                                            <span>Gratuit</span>
+                                        }
+                                        else
+                                        {
+                                            <span>-@discount.Value DT</span>
+                                        }
+                                    </td>
+                                    <td>
+                                        <small>@discount.StartDate.ToString("dd/MM/yy") - @discount.EndDate.ToString("dd/MM/yy")</small>
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-@statusBadge">@statusText</span>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Back Button -->
+    <div class="row mt-4">
+        <div class="col-12">
+            <a href="~/Panier" class="btn btn-primary">
+                <i class="fas fa-arrow-left me-2"></i>Retour au Panier
+            </a>
+        </div>
+    </div>
+</div>

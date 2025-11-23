@@ -1,0 +1,93 @@
+@model IEnumerable<GestionArticles.Models.Category>
+
+@{
+    ViewData["Title"] = "Catégories";
+}
+
+<div style="background-color: #ffffff; min-height: 100vh; padding: 2rem 0;">
+    <div class="container">
+        <!-- Hero Section -->
+        <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 4rem 2rem; border-radius: 12px; margin-bottom: 3rem; text-align: center;">
+            <h1 style="font-size: 3rem; font-weight: bold; margin-bottom: 1rem; color: white;">Nos Catégories</h1>
+            <p style="font-size: 1.2rem; color: white; margin-bottom: 0;">Découvrez notre vaste collection de catégories de produits soigneusement organisées pour vous.</p>
+        </div>
+
+        <!-- Categories Section -->
+        <div style="background-color: #ffffff; padding: 2rem 0;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+                <h2 style="color: #1f2937; font-weight: bold; font-size: 2rem; margin: 0;">Toutes les catégories</h2>
+                @if (User.IsInRole("Admin") || User.IsInRole("Manager"))
+                {
+                    <a href="@Url.Action("Create")" style="background-color: #2563eb; color: white; padding: 12px 24px; border-radius: 8px; text-decoration: none; font-weight: 600;">
+                        + Nouvelle catégorie
+                    </a>
+                }
+            </div>
+
+            @if (Model != null && Model.Any())
+            {
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 2rem;">
+                    @foreach (var item in Model)
+                    {
+                        <div style="background-color: #ffffff; border: 1px solid #e5e7eb; border-radius: 12px; padding: 2rem; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); text-align: center;">
+                            <div style="width: 60px; height: 60px; background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%); border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; margin-bottom: 1rem;">
+                                @if (!string.IsNullOrEmpty(item.Image))
+                                {
+                                    <img src="~/images/categories/@item.Image" style="width:60px; height:60px; border-radius:50%; object-fit:cover;" />
+                                }
+                                else
+                                {
+                                    <i class="fas fa-tag" style="color: white; font-size: 1.5rem;"></i>
+                                }
+                            </div>
+                            <h3 style="color: #1f2937; font-weight: bold; margin-bottom: 0.5rem; font-size: 1.25rem;">@item.CategoryName</h3>
+                            <p style="color: #6b7280; margin-bottom: 1.5rem;">Explorez les produits de cette catégorie</p>
+                            <div style="display: flex; gap: 0.5rem; justify-content: center; flex-wrap: wrap;">
+                                <a href="@Url.Action("Details", new { id = item.CategoryId })" style="background-color: transparent; color: #2563eb; border: 1px solid #2563eb; padding: 0.5rem 1rem; border-radius: 4px; text-decoration: none; font-size: 0.875rem;">
+                                    Voir
+                                </a>
+                                @if (User.IsInRole("Admin") || User.IsInRole("Manager"))
+                                {
+                                    <a href="@Url.Action("Edit", new { id = item.CategoryId })" style="background-color: transparent; color: #6b7280; border: 1px solid #6b7280; padding: 0.5rem 1rem; border-radius: 4px; text-decoration: none; font-size: 0.875rem;">
+                                        Modifier
+                                    </a>
+                                    <a href="@Url.Action("Delete", new { id = item.CategoryId })" style="background-color: transparent; color: #dc2626; border: 1px solid #dc2626; padding: 0.5rem 1rem; border-radius: 4px; text-decoration: none; font-size: 0.875rem;">
+                                        Supprimer
+                                    </a>
+                                }
+                            </div>
+                        </div>
+                    }
+                </div>
+            }
+            else
+            {
+                <div style="text-align: center; padding: 4rem 2rem; background-color: #f8fafc; border-radius: 12px;">
+                    <i class="fas fa-folder-open" style="font-size: 3rem; color: #6b7280; margin-bottom: 1rem;"></i>
+                    <h3 style="color: #6b7280; margin-bottom: 0.5rem;">Aucune catégorie trouvée</h3>
+                    <p style="color: #6b7280; margin-bottom: 2rem;">Il n'y a actuellement aucune catégorie disponible.</p>
+                    @if (User.IsInRole("Admin") || User.IsInRole("Manager"))
+                    {
+                        <a href="@Url.Action("Create")" style="background-color: #2563eb; color: white; padding: 12px 24px; border-radius: 8px; text-decoration: none; font-weight: 600;">
+                            Créer la première catégorie
+                        </a>
+                    }
+                </div>
+            }
+        </div>
+
+        <!-- Call to Action Section -->
+        <div style="background-color: #f8fafc; padding: 3rem 2rem; border-radius: 12px; margin-top: 3rem; text-align: center;">
+            <h3 style="color: #1f2937; font-weight: bold; margin-bottom: 1rem; font-size: 1.5rem;">Vous ne trouvez pas ce que vous cherchez ?</h3>
+            <p style="color: #6b7280; margin-bottom: 2rem;">Parcourez tous nos produits ou contactez-nous pour des suggestions personnalisées.</p>
+            <div style="display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap;">
+                <a href="@Url.Action("Index", "Product")" style="background-color: #2563eb; color: white; padding: 12px 24px; border-radius: 8px; text-decoration: none; font-weight: 600;">
+                    Voir tous les produits
+                </a>
+                <a href="@Url.Action("Index", "Home")" style="background-color: transparent; color: #2563eb; border: 1px solid #2563eb; padding: 12px 24px; border-radius: 8px; text-decoration: none; font-weight: 600;">
+                    Retour à l'accueil
+                </a>
+            </div>
+        </div>
+    </div>
+</div>

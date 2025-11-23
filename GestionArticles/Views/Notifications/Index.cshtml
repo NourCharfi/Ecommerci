@@ -1,0 +1,94 @@
+@{
+    ViewData["Title"] = "Mes Notifications";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container-fluid py-4">
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <h2><i class="fas fa-bell me-2"></i>Mes Notifications</h2>
+        </div>
+        <div class="col-md-4 text-end">
+            <button class="btn btn-outline-secondary me-2" id="markAllRead">
+                <i class="fas fa-check-double me-1"></i>Marquer tout comme lu
+            </button>
+            <a href="@Url.Action("Index", "Home")" class="btn btn-outline-primary">
+                <i class="fas fa-arrow-left me-1"></i>Retour
+            </a>
+        </div>
+    </div>
+
+    <!-- Filtres -->
+    <div class="card shadow-sm mb-4">
+        <div class="card-body">
+            <div class="btn-group" role="group">
+                <input type="radio" class="btn-check" name="filterType" id="filterAll" value="" checked>
+                <label class="btn btn-outline-primary" for="filterAll">
+                    <i class="fas fa-inbox me-1"></i>Toutes (<span id="countAll">0</span>)
+                </label>
+
+                <input type="radio" class="btn-check" name="filterType" id="filterUnread" value="unread">
+                <label class="btn btn-outline-primary" for="filterUnread">
+                    <i class="fas fa-circle me-1"></i>Non lues (<span id="countUnread">0</span>)
+                </label>
+
+                <input type="radio" class="btn-check" name="filterType" id="filterOrders" value="order">
+                <label class="btn btn-outline-primary" for="filterOrders">
+                    <i class="fas fa-shopping-cart me-1"></i>Commandes
+                </label>
+
+                <input type="radio" class="btn-check" name="filterType" id="filterPayments" value="payment">
+                <label class="btn btn-outline-primary" for="filterPayments">
+                    <i class="fas fa-credit-card me-1"></i>Paiements
+                </label>
+
+                <input type="radio" class="btn-check" name="filterType" id="filterProducts" value="product">
+                <label class="btn btn-outline-primary" for="filterProducts">
+                    <i class="fas fa-box me-1"></i>Produits
+                </label>
+            </div>
+        </div>
+    </div>
+
+    <!-- Liste des Notifications (ID corrigé) -->
+    <div id="notificationsPageList">
+        <div class="text-center text-muted py-5">
+            <i class="fas fa-inbox fs-1 mb-3 d-block opacity-50"></i>
+            <p>Chargement des notifications...</p>
+        </div>
+    </div>
+</div>
+
+<style>
+    .notification-card { border-left: 4px solid; transition: all 0.3s; cursor: pointer; }
+    .notification-card:hover { box-shadow: 0 4px 12px rgba(0,0,0,0.1); transform: translateX(4px); }
+    .notification-card.unread { background-color: #f0f4ff; }
+    .notification-card.primary { border-left-color: #667eea; }
+    .notification-card.success { border-left-color: #28a745; }
+    .notification-card.warning { border-left-color: #ffc107; }
+    .notification-card.danger { border-left-color: #dc3545; }
+    .notification-card.info { border-left-color: #17a2b8; }
+    .notification-badge { width:50px;height:50px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:1.5rem;color:#fff; }
+    .notification-badge.primary { background:#667eea; }
+    .notification-badge.success { background:#28a745; }
+    .notification-badge.warning { background:#ffc107;color:#333; }
+    .notification-badge.danger { background:#dc3545; }
+    .notification-badge.info { background:#17a2b8; }
+    .notification-time { font-size:.85rem;color:#999; }
+    .mark-read-badge { background:#667eea;color:#fff;padding:2px 8px;border-radius:12px;font-size:.75rem;font-weight:bold; }
+</style>
+
+@section Scripts {
+    <script src="~/js/notifications-shared.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            loadNotificationsShared();
+            document.querySelectorAll('input[name="filterType"]').forEach(i => {
+                i.addEventListener('change', function(){ filterNotificationsShared(this.value); });
+            });
+            document.getElementById('markAllRead').addEventListener('click', function(){
+                fetch('/api/notifications/read-all', { method: 'POST' }).finally(() => loadNotificationsShared());
+            });
+        });
+    </script>
+}

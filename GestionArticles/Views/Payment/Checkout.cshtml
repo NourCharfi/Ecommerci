@@ -1,0 +1,201 @@
+@model GestionArticles.ViewModels.Payment.PaymentViewModel
+@inject Microsoft.Extensions.Configuration.IConfiguration Configuration
+
+@{
+    ViewData["Title"] = "Paiement Sécurisé - ECommerci.tn";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    var stripePublicKey = Configuration["Stripe:PublicKey"] ?? "pk_test_51N44oSECv09izTbh";
+}
+
+<div class="container-fluid py-4">
+    <div class="row mb-4">
+        <div class="col-md-8 offset-md-2">
+            <h2><i class="fas fa-credit-card me-2"></i>Paiement de la commande</h2>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-8 offset-md-2">
+            <div class="card shadow-sm">
+                <div class="card-header bg-primary text-white">
+                    <strong>Commande #@Model.OrderId - Total: @Model.TotalAmount.ToString("F2") DT</strong>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-info mb-4">
+                        <i class="fas fa-info-circle me-2"></i>Choisissez votre mode de paiement.
+                    </div>
+
+                    <!-- Sélection mode -->
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Mode de paiement</label>
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="payMethod" id="payStripe" value="stripe" checked>
+                            <label class="form-check-label" for="payStripe">
+                                <i class="fas fa-lock me-1"></i>Stripe (sécurisé)
+                            </label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="payMethod" id="payManual" value="manual">
+                            <label class="form-check-label" for="payManual">
+                                <i class="fas fa-credit-card me-1"></i>Paiement manuel (simulation)
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Montant -->
+                    <div class="card bg-light mb-4">
+                        <div class="card-body d-flex justify-content-between align-items-center">
+                            <span class="fw-semibold">Montant à payer:</span>
+                            <span class="h5 text-primary mb-0">@Model.TotalAmount.ToString("F2") DT</span>
+                        </div>
+                    </div>
+
+                    <!-- Messages -->
+                    <div id="payment-message" class="alert alert-danger mt-2" style="display:none;"></div>
+
+                    <!-- Champs cachés -->
+                    <input type="hidden" id="orderId" value="@Model.OrderId" />
+                    <input type="hidden" id="amount" value="@Model.TotalAmount" />
+                    <input type="hidden" id="email" value="@Model.Email" />
+                    <input type="hidden" id="stripeKey" value="@stripePublicKey" />
+
+                    <!-- Bouton Stripe -->
+                    <div id="stripeSection" class="d-grid gap-2 mt-2">
+                        <button type="button" class="btn btn-primary btn-lg" id="checkout-btn" onclick="redirectToCheckout()">
+                            <i class="fas fa-lock me-2"></i>Payer @Model.TotalAmount.ToString("F2") DT via Stripe
+                        </button>
+                    </div>
+
+                    <!-- Formulaire Manuel -->
+                    <div id="manualSection" style="display:none;">
+                        <form asp-action="Manual" method="post" class="mt-3">
+                            @Html.AntiForgeryToken()
+                            <input type="hidden" name="OrderId" value="@Model.OrderId" />
+                            <input type="hidden" name="TotalAmount" value="@Model.TotalAmount" />
+                            <input type="hidden" name="Email" value="@Model.Email" />
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <label class="form-label">Titulaire</label>
+                                    <input name="CardholderName" class="form-control" placeholder="Nom complet" />
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">Téléphone</label>
+                                    <input name="PhoneNumber" class="form-control" placeholder="0601020304" />
+                                </div>
+                                <div class="col-12">
+                                    <label class="form-label">Numéro de carte</label>
+                                    <input name="CardNumber" class="form-control" placeholder="4111 1111 1111 1111" />
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label">Expiration (MM/AA)</label>
+                                    <input name="CardExpiry" class="form-control" placeholder="12/27" />
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label">CVC</label>
+                                    <input name="CardCVC" class="form-control" placeholder="123" />
+                                </div>
+                                <div class="col-md-4 d-flex align-items-end">
+                                    <button type="submit" class="btn btn-success w-100"><i class="fas fa-check me-1"></i>Payer</button>
+                                </div>
+                            </div>
+                            <div class="alert alert-warning mt-3 mb-0">
+                                <i class="fas fa-exclamation-triangle me-2"></i>Simulation uniquement (aucun débit réel).
+                            </div>
+                        </form>
+                    </div>
+
+                    <hr class="my-4" />
+
+                    <div class="d-flex justify-content-between">
+                        <a href="@Url.Action("Index", "Panier")" class="btn btn-secondary"><i class="fas fa-arrow-left me-1"></i>Retour panier</a>
+                        <a href="@Url.Action("Manual", "Payment", new { orderId = Model.OrderId })" class="btn btn-outline-dark">Page paiement manuel</a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="alert alert-light border mt-3">
+                <i class="fas fa-shield-alt me-2"></i><strong>Sécurité:</strong> Stripe héberge la page sécurisée. Le mode manuel est pour tests locaux.
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <!-- Stripe JS -->
+    <script src="https://js.stripe.com/v3/"></script>
+
+    <script>
+        const radios = document.querySelectorAll('input[name="payMethod"]');
+        const stripeSection = document.getElementById('stripeSection');
+        const manualSection = document.getElementById('manualSection');
+
+        radios.forEach(r => r.addEventListener('change', () => {
+            if (document.getElementById('payManual').checked) {
+                stripeSection.style.display = 'none';
+                manualSection.style.display = 'block';
+            } else {
+                manualSection.style.display = 'none';
+                stripeSection.style.display = 'grid';
+            }
+        }));
+
+        async function redirectToCheckout() {
+            const orderId = document.getElementById('orderId').value;
+            const amount = parseFloat(document.getElementById('amount').value);
+            const email = document.getElementById('email').value;
+            const stripeKey = document.getElementById('stripeKey').value;
+            const checkoutBtn = document.getElementById('checkout-btn');
+
+            if (!orderId || !amount || !email) {
+                alert('Erreur: infos manquantes');
+                return;
+            }
+
+            checkoutBtn.disabled = true;
+            checkoutBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Redirection...';
+
+            try {
+                // Étape 1: Créer une Session Checkout chez Stripe via le serveur
+                const response = await fetch('/Payment/CreateCheckoutSession', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('[name="__RequestVerificationToken"]')?.value || ''
+                    },
+                    body: JSON.stringify({
+                        orderId: parseInt(orderId),
+                        amount: amount,
+                        email: email
+                    })
+                });
+
+                if (!response.ok) {
+                    throw new Error('Erreur ' + response.status + ': ' + await response.text());
+                }
+
+                const data = await response.json();
+
+                if (!data.sessionId) {
+                    throw new Error('SessionId manquant');
+                }
+
+                // Étape 2: Rediriger vers Stripe Checkout (hébergé par Stripe)
+                const stripe = Stripe(stripeKey);
+                
+                const result = await stripe.redirectToCheckout({
+                    sessionId: data.sessionId
+                });
+
+                if (result.error) {
+                    throw new Error(result.error.message);
+                }
+            } catch (err) {
+                const msg = document.getElementById('payment-message');
+                msg.textContent = 'Erreur: ' + (err.message || 'Une erreur est survenue');
+                msg.style.display = 'block';
+                checkoutBtn.disabled = false;
+                checkoutBtn.innerHTML = '<i class="fas fa-lock me-2"></i>Payer ' + amount.toFixed(2) + ' DT via Stripe';
+            }
+        }
+    </script>
+}

@@ -1,0 +1,27 @@
+@using GestionArticles.Models.Promotions
+@model GestionArticles.ViewModels.ProductWithDiscountViewModel
+
+@if (Model?.HasDiscount == true && Model?.Discount != null)
+{
+    var discount = Model.Discount;
+    var timeRemaining = discount.EndDate - DateTime.Now;
+    var daysRemaining = timeRemaining.Days;
+    var hoursRemaining = timeRemaining.Hours;
+    
+    @if (discount.Type == DiscountType.Percentage)
+    {
+        <div class="alert alert-success mb-3" role="alert">
+            <div>
+                <strong>?? Réduction: -@discount.Value%</strong>
+            </div>
+        </div>
+    }
+    else if (discount.Type == DiscountType.FreeShipping)
+    {
+        <div class="alert alert-success mb-3" role="alert">
+            <div>
+                <strong>?? Livraison gratuite!</strong>
+            </div>
+        </div>
+    }
+}

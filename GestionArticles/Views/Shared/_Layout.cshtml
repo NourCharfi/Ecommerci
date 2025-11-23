@@ -1,0 +1,273 @@
+﻿<!DOCTYPE html>
+<html lang="fr" class="h-100">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - ECommerci.tn | E-commerce Premium</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/admin-theme.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/GestionArticles.styles.css" asp-append-version="true" />
+    <!-- Google Font Inter & Poppins -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Poppins:wght@600;700;800;900&display=swap" rel="stylesheet">
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <!-- DataTables CSS -->
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.7/css/dataTables.bootstrap5.min.css" />
+    <link rel="stylesheet" href="https://cdn.datatables.net/buttons/2.4.2/css/buttons.bootstrap5.min.css" />
+    <style>
+        .navbar-brand { font-family: 'Poppins', sans-serif; }
+        h1, h2, h3, h4, h5, h6 { font-family: 'Poppins', 'Inter', sans-serif; }
+    </style>
+</head>
+<body class="d-flex flex-column h-100">
+@using Microsoft.AspNetCore.Identity
+@inject SignInManager<IdentityUser> SignInManager
+@inject GestionArticles.Models.Repositories.IProductRepository ProductRepository
+@inject GestionArticles.Models.Repositories.ICategorieRepository CategoryRepository
+<header>
+    <!-- Top Bar -->
+    <div class="top-bar d-none d-md-flex justify-content-between align-items-center px-4">
+        <div class="small fw-semibold"><i class="fas fa-bullhorn me-1"></i> 🎉 Promo: Livraison gratuite + Réductions jusqu'à -30% !</div>
+        <div class="d-flex gap-3 small">
+            <a href="tel:+21600000000" class="text-decoration-none"><i class="fas fa-phone me-1"></i>+216 00 000 000</a>
+            <a href="mailto:contact@shop.tn" class="text-decoration-none"><i class="fas fa-envelope me-1"></i>contact@shop.tn</a>
+        </div>
+    </div>
+    <!-- Navbar principale -->
+    <nav class="navbar navbar-expand-lg main-navbar">
+        <div class="container-fluid">
+            <a class="navbar-brand mx-0 mx-lg-3" asp-controller="Home" asp-action="Index">
+                <i class="fas fa-shopping-bag me-2"></i><span class="fw-900">ECommerci.tn</span>
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarMain">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarMain">
+                <ul class="navbar-nav me-auto mb-2 mb-lg-0" id="mainNav">
+                    <li class="nav-item">
+                        <a class="nav-link" asp-controller="Home" asp-action="Index">
+                            <i class="fas fa-home me-1"></i>Accueil
+                        </a>
+                    </li>
+                    <!-- Mega Menu Catégories -->
+                    <li class="nav-item dropdown mega-menu">
+                        <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown" role="button">
+                            <i class="fas fa-th-large me-1"></i>Catégories
+                        </a>
+                        <div class="dropdown-menu mega-menu-content p-4 shadow-lg">
+                            <div class="row g-3" style="min-width:650px">
+                                @{ var cats = CategoryRepository.GetAll()?.Take(12).ToList() ?? new List<GestionArticles.Models.Category>(); }
+                                @foreach (var c in cats)
+                                {
+                                    <div class="col-6 col-md-4">
+                                        <a asp-controller="Product" asp-action="Index" asp-route-categoryId="@c.CategoryId" class="d-flex align-items-start gap-2 mega-cat-link">
+                                            <span class="mega-cat-icon"><i class="fas fa-tag text-secondary"></i></span>
+                                            <span class="small fw-semibold">@c.CategoryName</span>
+                                        </a>
+                                    </div>
+                                }
+                            </div>
+                            <div class="mt-3 text-end">
+                                <a asp-controller="Category" asp-action="Index" class="btn btn-sm btn-outline-primary">
+                                    <i class="fas fa-list me-1"></i>Toutes les catégories
+                                </a>
+                            </div>
+                        </div>
+                    </li>
+                    @if (SignInManager.IsSignedIn(User) && (User.IsInRole("Admin") || User.IsInRole("Manager")))
+                    {
+                        <li class="nav-item">
+                            <a class="nav-link" asp-controller="Product" asp-action="AdminIndex">
+                                <i class="fas fa-box me-1"></i>Produits
+                            </a>
+                        </li>
+                    }
+                    else
+                    {
+                        <li class="nav-item">
+                            <a class="nav-link" asp-controller="Product" asp-action="Index">
+                                <i class="fas fa-box me-1"></i>Produits
+                            </a>
+                        </li>
+                    }
+                    @if (SignInManager.IsSignedIn(User))
+                    {
+                        <li class="nav-item">
+                            <a class="nav-link" asp-controller="Orders" asp-action="@(User.IsInRole("Admin")?"Index":"MyOrders")">
+                                <i class="fas fa-receipt me-1"></i>@(User.IsInRole("Admin")?"Commandes":"Mes Commandes")
+                            </a>
+                        </li>
+                    }
+                    @if (SignInManager.IsSignedIn(User) && User.IsInRole("Admin"))
+                    {
+                        var lowCount=0; var ruptureCount=0; 
+                        try{var all=ProductRepository.GetAll(); lowCount=all.Count(p=>p.QteStock>0 && p.QteStock<=20); ruptureCount=all.Count(p=>p.QteStock==0);}catch{}
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" data-bs-toggle="dropdown" href="#">
+                                <i class="fas fa-cog me-1"></i>Admin
+                            </a>
+                            <div class="dropdown-menu dropdown-menu-modern">
+                                <a class="dropdown-item" asp-controller="Admin" asp-action="Index">
+                                    <i class="fas fa-tachometer-alt me-2"></i>Tableau de bord
+                                </a>
+                                <div class="dropdown-divider"></div>
+                                <h6 class="dropdown-header">Rôles</h6>
+                                <a class="dropdown-item" asp-controller="Admin" asp-action="CreateRole">
+                                    <i class="fas fa-plus me-2"></i>Créer un rôle
+                                </a>
+                                <a class="dropdown-item" asp-controller="Admin" asp-action="ListRoles">
+                                    <i class="fas fa-list me-2"></i>Liste des rôles
+                                </a>
+                                <div class="dropdown-divider"></div>
+                                <h6 class="dropdown-header">Stock</h6>
+                                <a class="dropdown-item d-flex justify-content-between align-items-center" asp-controller="Stock" asp-action="Index">
+                                    <span><i class="fas fa-warehouse me-2"></i>Stock</span>
+                                    <span>@if(lowCount>0){<span class="badge badge-warning">@lowCount</span>} @if(ruptureCount>0){<span class="badge badge-danger ms-1">@ruptureCount</span>}</span>
+                                </a>
+                            </div>
+                        </li>
+                    }
+                </ul>
+                <!-- Barre de recherche -->
+                <form class="search-wide mx-lg-3 mb-3 mb-lg-0" asp-controller="Product" asp-action="Search" role="search">
+                    <div class="input-group input-group-lg rounded overflow-hidden shadow-sm">
+                        <input class="form-control border-0" type="search" placeholder="Rechercher un produit..." name="val">
+                        <button class="btn btn-primary px-4" type="submit"><i class="fas fa-search"></i></button>
+                    </div>
+                </form>
+                <!-- Actions utilisateur -->
+                <div class="d-flex align-items-center gap-2 nav-actions">
+                    @if (SignInManager.IsSignedIn(User)) 
+                    {
+                        <a class="btn btn-icon btn-outline-secondary position-relative" asp-controller="Favorites" asp-action="Index" title="Mes favoris">
+                            <i class="fas fa-heart"></i>
+                        </a>
+                        @await Html.PartialAsync("_NotificationBell")
+                    }
+                    <a class="btn btn-icon btn-outline-secondary position-relative" asp-controller="Panier" asp-action="Index" title="Mon Panier">
+                        <i class="fas fa-shopping-cart"></i><span class="cart-badge">0</span>
+                    </a>
+                    @if (SignInManager.IsSignedIn(User)) 
+                    {
+                        <div class="dropdown">
+                            <a class="btn btn-primary dropdown-toggle d-flex align-items-center gap-2" href="#" data-bs-toggle="dropdown">
+                                <i class="fas @(User.IsInRole("Admin")?"fa-user-shield":"fa-user-circle")"></i><span class="d-none d-md-inline">@User.Identity.Name</span>
+                            </a>
+                            <ul class="dropdown-menu dropdown-menu-modern dropdown-menu-end">
+                                <li><a class="dropdown-item" asp-controller="Account" asp-action="Profile"><i class="fas fa-id-badge me-2"></i>Mon profil</a></li>
+                                <li><hr class="dropdown-divider" /></li>
+                                <li><form method="post" asp-controller="Account" asp-action="Logout" class="m-0"><button type="submit" class="dropdown-item text-danger"><i class="fas fa-sign-out-alt me-2"></i>Déconnexion</button></form></li>
+                            </ul>
+                        </div>
+                    } 
+                    else 
+                    {
+                        <a class="btn btn-outline-primary" asp-controller="Account" asp-action="Register">
+                            <i class="fas fa-user-plus me-1"></i>S'inscrire
+                        </a>
+                        <a class="btn btn-primary" asp-controller="Account" asp-action="Login">
+                            <i class="fas fa-sign-in-alt me-1"></i>Connexion
+                        </a>
+                    }
+                </div>
+            </div>
+        </div>
+    </nav>
+</header>
+
+@{ 
+    var currentController = ViewContext.RouteData.Values["controller"]?.ToString() ?? ""; 
+    var currentAction = ViewContext.RouteData.Values["action"]?.ToString() ?? ""; 
+    var showAdminSidebar = (SignInManager.IsSignedIn(User) && (User.IsInRole("Admin") || User.IsInRole("Manager"))); 
+    var isHomePage = currentController.Equals("Home", StringComparison.OrdinalIgnoreCase) && currentAction.Equals("Index", StringComparison.OrdinalIgnoreCase); 
+    var showSidebar = !isHomePage; 
+    var isAuthPage = currentController=="Account" && (currentAction=="Login" || currentAction=="Register"); 
+}
+
+@if (showSidebar) 
+{
+    <div class="container-fluid flex-grow-1 d-flex">
+        <div class="row flex-grow-1 w-100 m-0">
+            @if (showAdminSidebar) 
+            {
+                <div class="col-lg-2 d-none d-lg-block pe-0">
+                    <div class="sidebar">@await Html.PartialAsync("_AdminSidebar")</div>
+                </div>
+                <div class="col-lg-10">
+                    <main class="py-4">
+                        @RenderBody()
+                        <div class="integrated-footer">© @DateTime.Now.Year ECommerci.tn - Tous droits réservés</div>
+                    </main>
+                </div>
+            } 
+            else 
+            {
+                <div class="col-lg-2 d-none d-lg-block pe-0">
+                    <div class="sidebar">
+                        <h6 class="sidebar-title"><i class="fas fa-filter me-2"></i>Filtres</h6>
+                        @await Html.PartialAsync("_CategoriesMenu", CategoryRepository.GetAll())
+                    </div>
+                </div>
+                <div class="col-lg-10">
+                    <main class="py-4">
+                        @RenderBody()
+                        <div class="integrated-footer">© @DateTime.Now.Year ECommerci.tn - Tous droits réservés</div>
+                    </main>
+                </div>
+            }
+        </div>
+    </div>
+} 
+else 
+{ 
+    <main class="flex-grow-1 @(isAuthPage?"auth-layout-main":"")">
+        @RenderBody()
+        <div class="integrated-footer">© @DateTime.Now.Year ECommerci.tn - Tous droits réservés</div>
+    </main> 
+}
+
+<!-- Scripts -->
+<script src="~/lib/jquery/dist/jquery.min.js"></script>
+<script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+<!-- DataTables JS -->
+<script src="https://cdn.datatables.net/1.13.7/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.7/js/dataTables.bootstrap5.min.js"></script>
+<script src="https://cdn.datatables.net/buttons/2.4.2/js/dataTables.buttons.min.js"></script>
+<script src="https://cdn.datatables.net/buttons/2.4.2/js/buttons.bootstrap5.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/pdfmake.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/vfs_fonts.js"></script>
+<script src="https://cdn.datatables.net/buttons/2.4.2/js/buttons.html5.min.js"></script>
+<script src="https://cdn.datatables.net/buttons/2.4.2/js/buttons.print.min.js"></script>
+
+<script src="~/js/site.js" asp-append-version="true"></script>
+<script src="~/js/Monscript.js" asp-append-version="true"></script>
+<script src="~/js/CustomScript.js"></script>
+<script src="~/js/currency-formatter.js"></script>
+<!-- DataTables initialization -->
+<script src="~/js/datatables-global.js"></script>
+<!-- Notifications -->
+<script src="~/js/notifications-shared.js"></script>
+<script>
+    (function(){
+        // Navbar scroll effect
+        window.addEventListener('scroll', () => {
+            document.querySelector('.navbar').classList.toggle('scrolled', window.scrollY > 20);
+        });
+        
+        // Active link marker
+        const path = window.location.pathname.toLowerCase();
+        document.querySelectorAll('#mainNav .nav-link').forEach(l=>{
+            const href = l.getAttribute('href');
+            if(href && path.startsWith(href.toLowerCase())) l.classList.add('active');
+            l.addEventListener('click',()=>{
+                document.querySelectorAll('#mainNav .nav-link.active').forEach(a=>a.classList.remove('active')); 
+                l.classList.add('active');
+            });
+        });
+    })();
+</script>
+@await RenderSectionAsync("Scripts", required:false)
+</body>
+</html>

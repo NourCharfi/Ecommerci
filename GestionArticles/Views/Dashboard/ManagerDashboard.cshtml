@@ -1,0 +1,118 @@
+@model GestionArticles.ViewModels.ManagerDashboardViewModel
+
+@{
+    ViewData["Title"] = "Dashboard Manager";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container-fluid mt-4">
+    <h1 class="mb-4">Dashboard Manager</h1>
+
+    <!-- Stats Principales -->
+    <div class="row mb-4">
+        <div class="col-md-4 mb-3">
+            <div class="card bg-primary text-white shadow-sm">
+                <div class="card-body">
+                    <h6 class="card-title">Produits</h6>
+                    <h3>@Model.TotalProducts</h3>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4 mb-3">
+            <div class="card bg-success text-white shadow-sm">
+                <div class="card-body">
+                    <h6 class="card-title">Commandes</h6>
+                    <h3>@Model.TotalOrders</h3>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4 mb-3">
+            <div class="card bg-warning text-white shadow-sm">
+                <div class="card-body">
+                    <h6 class="card-title">Revenu</h6>
+                    <h3>@Model.TotalRevenue.ToString("C")</h3>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Alertes -->
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <div class="card shadow-sm border-danger">
+                <div class="card-header bg-danger text-white">
+                    <h6 class="mb-0">Stock à Surveiller</h6>
+                </div>
+                <div class="card-body">
+                    <p><strong>Stock Faible:</strong> <span class="badge bg-warning">@Model.ProductsLowStock</span></p>
+                    <a href="@Url.Action("Index", "Stock")" class="btn btn-sm btn-danger">
+                        <i class="fas fa-warehouse me-1"></i>Gérer le stock
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="card shadow-sm border-info">
+                <div class="card-header bg-info text-white">
+                    <h6 class="mb-0">Commandes en Attente</h6>
+                </div>
+                <div class="card-body">
+                    <p><strong>En Attente de Traitement:</strong> <span class="badge bg-warning">@Model.OrdersPending</span></p>
+                    <a href="@Url.Action("Index", "Orders")" class="btn btn-sm btn-info">
+                        <i class="fas fa-clipboard-list me-1"></i>Voir les commandes
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Commandes Récentes -->
+    <div class="card shadow-sm">
+        <div class="card-header bg-primary text-white">
+            <h6 class="mb-0">Commandes Récentes</h6>
+        </div>
+        <div class="card-body">
+            @if (Model.RecentOrders.Any())
+            {
+                <div class="table-responsive">
+                    <table class="table table-striped table-hover">
+                        <thead class="table-dark">
+                            <tr>
+                                <th>Commande</th>
+                                <th>Client</th>
+                                <th>Montant</th>
+                                <th>Date</th>
+                                <th>Statut</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var order in Model.RecentOrders)
+                            {
+                                <tr>
+                                    <td><strong>#@order.Id</strong></td>
+                                    <td>@order.CustomerName</td>
+                                    <td>@order.TotalAmount.ToString("C")</td>
+                                    <td><small>@order.OrderDate.ToString("dd/MM/yyyy HH:mm")</small></td>
+                                    <td>
+                                        <span class="badge @(order.Status == "Delivered" ? "bg-success" : order.Status == "Confirmed" ? "bg-info" : "bg-warning")">
+                                            @order.Status
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <a href="@Url.Action("Details", "Orders", new { id = order.Id })" class="btn btn-sm btn-primary">
+                                            <i class="fas fa-eye me-1"></i>Voir
+                                        </a>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+        </div>
+    </div>
+</div>

@@ -1,0 +1,145 @@
+@model Microsoft.AspNetCore.Identity.IdentityUser
+
+@{
+    ViewData["Title"] = "Edit User";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    var userRoles = (List<string>)ViewBag.UserRoles;
+    var availableRoles = (List<Microsoft.AspNetCore.Identity.IdentityRole>)ViewBag.AvailableRoles;
+}
+
+<div class="container-fluid py-4">
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <h2><i class="fas fa-user-edit me-2"></i>Edit User</h2>
+        </div>
+        <div class="col-md-4 text-end">
+            <a href="@Url.Action("Index", "UserManagement")" class="btn btn-outline-secondary">
+                <i class="fas fa-arrow-left me-2"></i>Back to Users
+            </a>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card shadow-sm">
+                <div class="card-header bg-primary text-white">
+                    <strong>User Information</strong>
+                </div>
+                <div class="card-body">
+                    <form asp-action="Edit" asp-route-id="@Model.Id" method="post">
+                        <div class="mb-3">
+                            <label asp-for="UserName" class="form-label"></label>
+                            <input asp-for="UserName" class="form-control" />
+                            <span asp-validation-for="UserName" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="Email" class="form-label"></label>
+                            <input asp-for="Email" class="form-control" type="email" />
+                            <span asp-validation-for="Email" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="PhoneNumber" class="form-label"></label>
+                            <input asp-for="PhoneNumber" class="form-control" type="tel" />
+                            <span asp-validation-for="PhoneNumber" class="text-danger"></span>
+                        </div>
+
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save me-2"></i>Save Changes
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Roles Assignment -->
+            <div class="card shadow-sm mt-3">
+                <div class="card-header bg-info text-white">
+                    <strong>Assign Roles</strong>
+                </div>
+                <div class="card-body">
+                    <form asp-action="AssignRoles" asp-route-id="@Model.Id" method="post">
+                        <div class="mb-3">
+                            @if (availableRoles != null && availableRoles.Count > 0)
+                            {
+                                @foreach (var role in availableRoles)
+                                {
+                                    var isChecked = userRoles != null && userRoles.Contains(role.Name);
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="roles" value="@role.Name" id="role_@role.Id" @(isChecked ? "checked" : "") />
+                                        <label class="form-check-label" for="role_@role.Id">
+                                            @role.Name
+                                        </label>
+                                    </div>
+                                }
+                            }
+                        </div>
+                        <button type="submit" class="btn btn-success">
+                            <i class="fas fa-check me-2"></i>Update Roles
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Additional Actions -->
+            <div class="card shadow-sm mt-3">
+                <div class="card-header bg-warning text-dark">
+                    <strong>Additional Actions</strong>
+                </div>
+                <div class="card-body">
+                    <a href="@Url.Action("ResetPassword", "UserManagement", new { id = Model.Id })" class="btn btn-secondary btn-block w-100 mb-2">
+                        <i class="fas fa-key me-2"></i>Reset Password
+                    </a>
+                    <a href="@Url.Action("Delete", "UserManagement", new { id = Model.Id })" class="btn btn-danger w-100">
+                        <i class="fas fa-trash me-2"></i>Delete User
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- User Details Sidebar -->
+        <div class="col-md-4">
+            <div class="card shadow-sm">
+                <div class="card-header bg-secondary text-white">
+                    <strong>User Details</strong>
+                </div>
+                <div class="card-body">
+                    <dl class="row">
+                        <dt class="col-sm-4">ID:</dt>
+                        <dd class="col-sm-8"><small>@Model.Id</small></dd>
+
+                        <dt class="col-sm-4">Username:</dt>
+                        <dd class="col-sm-8"><strong>@Model.UserName</strong></dd>
+
+                        <dt class="col-sm-4">Email:</dt>
+                        <dd class="col-sm-8">@Model.Email</dd>
+
+                        <dt class="col-sm-4">Phone:</dt>
+                        <dd class="col-sm-8">@(Model.PhoneNumber ?? "N/A")</dd>
+
+                        <dt class="col-sm-4">Roles:</dt>
+                        <dd class="col-sm-8">
+                            @if (userRoles != null && userRoles.Count > 0)
+                            {
+                                @foreach (var role in userRoles)
+                                {
+                                    <span class="badge bg-primary">@role</span>
+                                }
+                            }
+                            else
+                            {
+                                <span class="badge bg-secondary">No roles</span>
+                            }
+                        </dd>
+                    </dl>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

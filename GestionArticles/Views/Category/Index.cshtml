@@ -1,0 +1,73 @@
+﻿@model IEnumerable<GestionArticles.Models.Category>
+@{
+    ViewData["Title"] = "Nos Catégories";
+}
+
+<!-- Page Header -->
+<div class="mb-5">
+    <div class="text-center">
+        <h1 class="display-4 fw-bold mb-3">
+            <i class="fas fa-th-large me-3 text-primary"></i> Nos Catégories
+        </h1>
+        <p class="lead text-muted">Explorez nos produits par catégorie</p>
+    </div>
+</div>
+
+<!-- Categories Grid -->
+<div class="row g-4">
+    @foreach (var category in Model)
+    {
+        var categoryImage = string.IsNullOrEmpty(category.Image) 
+            ? "~/images/categories/default-category.jpg" 
+            : "~/images/categories/" + category.Image;
+        
+        <div class="col-lg-4 col-md-6">
+            <a asp-controller="Product" asp-action="Index" asp-route-categoryId="@category.CategoryId" 
+               class="text-decoration-none">
+                <div class="category-card">
+                    <img src="@categoryImage" asp-append-version="true" 
+                         class="category-card-image" 
+                         alt="@category.CategoryName" 
+                         onerror="this.src='/images/noimage.jpg'" />
+                    <div class="category-card-overlay">
+                        <h3 class="category-card-title">
+                            @category.CategoryName
+                        </h3>
+                        <p class="text-white-50 mb-0">
+                            @category.Products.Count() @(category.Products.Count() == 1 ? "produit" : "produits")
+                        </p>
+                    </div>
+                </div>
+            </a>
+        </div>
+    }
+</div>
+
+@if (!Model.Any())
+{
+    <div class="text-center py-5">
+        <div class="mb-4">
+            <i class="fas fa-th-large fa-5x text-muted opacity-50"></i>
+        </div>
+        <h3 class="text-muted">Aucune catégorie disponible</h3>
+        <p class="text-muted">Les catégories seront bientôt disponibles</p>
+    </div>
+}
+
+<!-- Call to Action -->
+<div class="mt-5">
+    <div class="card bg-primary text-white border-0 shadow-lg">
+        <div class="card-body p-5 text-center">
+            <h3 class="mb-3">Vous ne trouvez pas ce que vous cherchez ?</h3>
+            <p class="lead mb-4">Explorez tous nos produits ou contactez notre service client</p>
+            <div class="d-flex gap-3 justify-content-center flex-wrap">
+                <a asp-controller="Product" asp-action="Index" class="btn btn-light btn-lg">
+                    <i class="fas fa-box me-2"></i> Tous les produits
+                </a>
+                <a asp-controller="Home" asp-action="Privacy" class="btn btn-outline-light btn-lg">
+                    <i class="fas fa-phone me-2"></i> Nous contacter
+                </a>
+            </div>
+        </div>
+    </div>
+</div>

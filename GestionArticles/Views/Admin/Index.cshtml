@@ -1,0 +1,17 @@
+@model GestionArticles.ViewModels.DashboardViewModel
+@{
+    ViewData["Title"] = "Tableau de bord";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<script>
+    // Redirection automatique vers le tableau de bord approprié
+    window.location.href = "@Url.Action("Index", "Dashboard")";
+</script>
+
+<div class="text-center mt-5">
+    <p>Redirection en cours...</p>
+    <a href="@Url.Action("Index", "Dashboard")" class="btn btn-primary">
+        <i class="fas fa-arrow-right me-2"></i>Accéder au tableau de bord
+    </a>
+</div>

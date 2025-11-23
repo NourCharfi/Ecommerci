@@ -1,0 +1,173 @@
+@model GestionArticles.ViewModels.AdminDashboardViewModel
+
+@{
+    ViewData["Title"] = "Dashboard Admin";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container-fluid mt-4">
+    <h1 class="mb-4">Dashboard Administration</h1>
+
+    <!-- Stats Principales -->
+    <div class="row mb-4">
+        <div class="col-md-3 mb-3">
+            <div class="card bg-primary text-white shadow-sm">
+                <div class="card-body">
+                    <h6 class="card-title">Produits Totaux</h6>
+                    <h3>@Model.TotalProducts</h3>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3 mb-3">
+            <div class="card bg-success text-white shadow-sm">
+                <div class="card-body">
+                    <h6 class="card-title">Commandes</h6>
+                    <h3>@Model.TotalOrders</h3>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3 mb-3">
+            <div class="card bg-info text-white shadow-sm">
+                <div class="card-body">
+                    <h6 class="card-title">Utilisateurs</h6>
+                    <h3>@Model.TotalUsers</h3>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3 mb-3">
+            <div class="card bg-warning text-white shadow-sm">
+                <div class="card-body">
+                    <h6 class="card-title">Revenu Total</h6>
+                    <h3>@Model.TotalRevenue.ToString("C")</h3>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Alertes Stock et Commandes -->
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <div class="card shadow-sm border-danger">
+                <div class="card-header bg-danger text-white">
+                    <h6 class="mb-0">Alertes Stock</h6>
+                </div>
+                <div class="card-body">
+                    <p><strong>Stock Faible:</strong> <span class="badge bg-warning">@Model.ProductsLowStock</span></p>
+                    <p><strong>Rupture de Stock:</strong> <span class="badge bg-danger">@Model.ProductsOutOfStock</span></p>
+                    <p><strong>En Corbeille:</strong> <span class="badge bg-secondary">@Model.ProductsDeleted</span></p>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="card shadow-sm border-info">
+                <div class="card-header bg-info text-white">
+                    <h6 class="mb-0">Statut Commandes</h6>
+                </div>
+                <div class="card-body">
+                    <p><strong>En Attente:</strong> <span class="badge bg-warning">@Model.OrdersPending</span></p>
+                    <p><strong>En Livraison:</strong> <span class="badge bg-info">@Model.OrdersShipping</span></p>
+                    <p><strong>Livrées:</strong> <span class="badge bg-success">@Model.OrdersDelivered</span></p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Commandes Récentes -->
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <div class="card shadow-sm">
+                <div class="card-header bg-primary text-white">
+                    <h6 class="mb-0">Commandes Récentes</h6>
+                </div>
+                <div class="card-body">
+                    @if (Model.RecentOrders.Any())
+                    {
+                        <div class="table-responsive">
+                            <table class="table table-sm table-striped">
+                                <thead>
+                                    <tr>
+                                        <th>Commande</th>
+                                        <th>Client</th>
+                                        <th>Montant</th>
+                                        <th>Date</th>
+                                        <th>Statut</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var order in Model.RecentOrders)
+                                    {
+                                        <tr>
+                                            <td><strong>#@order.Id</strong></td>
+                                            <td>@order.CustomerName</td>
+                                            <td>@order.TotalAmount.ToString("C")</td>
+                                            <td><small>@order.OrderDate.ToString("dd/MM/yyyy HH:mm")</small></td>
+                                            <td>
+                                                <span class="badge @(order.Status == "Delivered" ? "bg-success" : order.Status == "Confirmed" ? "bg-info" : "bg-warning")">
+                                                    @order.Status
+                                                </span>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+
+        <!-- Actions Récentes -->
+        <div class="col-md-4">
+            <div class="card shadow-sm">
+                <div class="card-header bg-success text-white">
+                    <h6 class="mb-0">Activités Récentes</h6>
+                </div>
+                <div class="card-body" style="max-height: 300px; overflow-y: auto;">
+                    @if (Model.RecentAuditLogs.Any())
+                    {
+                        <ul class="list-unstyled">
+                            @foreach (var log in Model.RecentAuditLogs.Take(10))
+                            {
+                                <li class="mb-2 pb-2 border-bottom">
+                                    <small>
+                                        <strong>@log.UserEmail</strong><br>
+                                        @log.Action sur @log.Entity<br>
+                                        <span class="text-muted">@log.Timestamp.ToString("dd/MM/yyyy HH:mm")</span>
+                                    </small>
+                                </li>
+                            }
+                        </ul>
+                    }
+                    else
+                    {
+                        <div class="alert alert-info mb-0"><i class="fas fa-info-circle me-1"></i>Aucune activité récente</div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Liens Rapides -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card shadow-sm">
+                <div class="card-header bg-dark text-white">
+                    <h6 class="mb-0">Accès Rapide</h6>
+                </div>
+                <div class="card-body">
+                    <div class="btn-group" role="group">
+                        <a href="@Url.Action("AdminIndex", "Product")" class="btn btn-outline-primary"><i class="fas fa-box-open me-2"></i>Produits</a>
+                        <a href="@Url.Action("Index", "Orders")" class="btn btn-outline-success"><i class="fas fa-clipboard-list me-2"></i>Commandes</a>
+                        <a href="@Url.Action("Index", "Trash")" class="btn btn-outline-danger"><i class="fas fa-trash me-2"></i>Corbeille</a>
+                        <a href="@Url.Action("Index", "Audit")" class="btn btn-outline-info"><i class="fas fa-history me-2"></i>Historique</a>
+                        <a href="@Url.Action("Index", "Discount")" class="btn btn-outline-success"><i class="fas fa-percentage me-2"></i>Soldes</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

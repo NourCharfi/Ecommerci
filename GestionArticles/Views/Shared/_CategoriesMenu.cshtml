@@ -1,0 +1,57 @@
+﻿@model IEnumerable<GestionArticles.Models.Category>
+@{
+    int? currentCat = null;
+    if (Context.Request.Query.ContainsKey("categoryId"))
+    {
+        if (int.TryParse(Context.Request.Query["categoryId"], out var cid)) currentCat = cid;
+    }
+}
+<div class="categories-sidebar-modern">
+    <div class="sidebar-section mb-3">
+        <div class="sidebar-title"><i class="fas fa-filter me-2"></i>Catégories</div>
+        <nav class="nav flex-column" id="catNav">
+            <a class="nav-link @(currentCat==null?"active":null)" asp-controller="Product" asp-action="Index">
+                <i class="fas fa-th me-2"></i>Toutes <span class="badge bg-primary ms-1">@Model.Sum(c=>c.Products.Count())</span>
+            </a>
+            @foreach (var category in Model)
+            {
+                <a class="nav-link d-flex justify-content-between align-items-center @(currentCat==category.CategoryId?"active":null)"
+                   asp-controller="Product" asp-action="Index" asp-route-categoryId="@category.CategoryId">
+                    <span><i class="fas fa-tag me-2 text-primary"></i>@category.CategoryName</span>
+                    <span class="badge bg-secondary">@category.Products.Count()</span>
+                </a>
+            }
+        </nav>
+    </div>
+    <div class="sidebar-section mb-3">
+        <div class="sidebar-title"><i class="fas fa-bolt me-2"></i>Accès rapide</div>
+        <div class="quick-grid">
+            <a class="quick-item" asp-controller="Panier" asp-action="Index" title="Panier"><i class="fas fa-shopping-cart"></i><span>Panier</span></a>
+            <a class="quick-item" asp-controller="Favorites" asp-action="Index" title="Favoris"><i class="fas fa-heart"></i><span>Favoris</span></a>
+            <a class="quick-item" asp-controller="Orders" asp-action="MyOrders" title="Commandes"><i class="fas fa-receipt"></i><span>Commandes</span></a>
+        </div>
+    </div>
+    <div class="sidebar-section search-mini">
+        <form asp-controller="Product" asp-action="Search" method="get" class="d-flex">
+            <input name="val" class="form-control form-control-sm me-2" placeholder="Rechercher..." />
+            <button class="btn btn-primary btn-sm" type="submit"><i class="fas fa-search"></i></button>
+        </form>
+    </div>
+</div>
+<style>
+.categories-sidebar-modern{display:flex;flex-direction:column;background:linear-gradient(180deg,#ffffff 0%,#f7f9fc 100%);border:1px solid #e2e8f0;border-radius:12px;padding:1rem .75rem;box-shadow:0 4px 12px rgba(0,0,0,.05);position:sticky;top:100px}
+.categories-sidebar-modern .sidebar-title{font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:#6c757d;margin-bottom:.5rem;display:flex;align-items:center}
+#catNav .nav-link{color:#4a5568;font-weight:500;padding:.55rem .6rem;border-radius:8px;font-size:.85rem;display:flex;align-items:center;gap:.35rem;transition:.25s}
+#catNav .nav-link:hover{background:#eef2f7;color:#2d3561}
+#catNav .nav-link.active{background:#2d3561;color:#fff;box-shadow:0 3px 8px rgba(0,0,0,.15)}
+#catNav .nav-link .badge{font-size:.6rem}
+.quick-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:.5rem}
+.quick-item{background:#fff;border:1px solid #e2e8f0;border-radius:10px;padding:.6rem .4rem;text-align:center;font-size:.65rem;font-weight:600;color:#4a5568;text-decoration:none;display:flex;flex-direction:column;gap:.3rem;transition:.25s}
+.quick-item i{font-size:1rem;color:#2d3561}
+.quick-item:hover{background:#2d3561;color:#fff;transform:translateY(-3px);box-shadow:0 6px 16px rgba(0,0,0,.15)}
+.quick-item:hover i{color:#fff}
+.search-mini .form-control{background:#fff;border:1px solid #d0d7e2}
+.search-mini .form-control:focus{border-color:#2d3561;box-shadow:0 0 0 3px rgba(45,53,97,.2)}
+@@media (max-width:992px){.categories-sidebar-modern{position:relative;top:0}}
+</style>
+<script>document.addEventListener('DOMContentLoaded',()=>{const p=new URLSearchParams(window.location.search);const cid=p.get('categoryId');if(cid){document.querySelectorAll('#catNav .nav-link').forEach(l=>{if(l.href.includes('categoryId='+cid)){l.classList.add('active');}});}});</script>

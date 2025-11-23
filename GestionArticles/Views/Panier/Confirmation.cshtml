@@ -1,0 +1,265 @@
+﻿@model GestionArticles.Models.Orders.Order
+@{
+    ViewData["Title"] = "Confirmation de Commande";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container-fluid py-4">
+    <!-- Alerte de Succès -->
+    <div class="alert alert-success alert-dismissible fade show mb-4" role="alert">
+        <i class="fas fa-check-circle me-2 fs-5"></i>
+        <div>
+            <strong>Commande Validée avec Succès!</strong>
+            <p class="mb-0">Merci pour votre achat, <strong>@Model.CustomerName</strong>! Votre commande a bien été enregistrée.</p>
+        </div>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </alert>
+
+    <div class="row">
+        <!-- Récapitulatif Principal -->
+        <div class="col-lg-8">
+            <!-- Détails Commande -->
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0">
+                        <i class="fas fa-shopping-bag me-2"></i>Récapitulatif de Votre Commande
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <dl>
+                                <dt class="text-muted">Numéro de Commande:</dt>
+                                <dd><strong class="text-primary">#@Model.Id</strong></dd>
+
+                                <dt class="text-muted mt-3">Date:</dt>
+                                <dd>@Model.OrderDate.ToString("dddd dd MMMM yyyy à HH:mm", System.Globalization.CultureInfo.CreateSpecificCulture("fr-FR"))</dd>
+
+                                <dt class="text-muted mt-3">Statut:</dt>
+                                <dd>
+                                    @if (Model.Status == GestionArticles.Models.Orders.OrderStatus.Paid)
+                                    {
+                                        <span class="badge bg-primary">
+                                            <i class="fas fa-credit-card me-1"></i>Payée
+                                        </span>
+                                    }
+                                    else if (Model.Status == GestionArticles.Models.Orders.OrderStatus.Confirmed)
+                                    {
+                                        <span class="badge bg-success">
+                                            <i class="fas fa-check-circle me-1"></i>Confirmée
+                                        </span>
+                                    }
+                                    else if (Model.Status == GestionArticles.Models.Orders.OrderStatus.Processing)
+                                    {
+                                        <span class="badge bg-warning">
+                                            <i class="fas fa-hourglass-half me-1"></i>En Attente de Paiement
+                                        </span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-secondary">@Model.Status</span>
+                                    }
+                                </dd>
+                            </dl>
+                        </div>
+
+                        <div class="col-md-6">
+                            <dl>
+                                <dt class="text-muted">Méthode de Paiement:</dt>
+                                <dd>
+                                    @if (Model.PaymentMethod == "COD")
+                                    {
+                                        <span><i class="fas fa-money-bill-wave text-warning me-1"></i>Paiement à la Livraison</span>
+                                    }
+                                    else if (Model.PaymentMethod == "CARD")
+                                    {
+                                        <span><i class="fas fa-credit-card text-success me-1"></i>Paiement par Carte Stripe</span>
+                                    }
+                                </dd>
+
+                                <dt class="text-muted mt-3">Montant Total:</dt>
+                                <dd><strong class="text-success fs-5">@Model.TotalAmount.ToString("F2") DT</strong></dd>
+
+                                <dt class="text-muted mt-3">Frais de Livraison:</dt>
+                                <dd>@Model.DeliveryFee.ToString("F2") DT</dd>
+                            </dl>
+                        </div>
+                    </div>
+
+                    <hr />
+
+                    <!-- Informations de Livraison -->
+                    <div class="row">
+                        <div class="col-md-6">
+                            <strong><i class="fas fa-user me-2"></i>Informations Personnelles</strong>
+                            <p class="text-muted mb-1">
+                                @Model.FirstName @Model.LastName
+                            </p>
+                            <p class="text-muted mb-1">
+                                <i class="fas fa-phone text-primary me-1"></i>@Model.Phone
+                            </p>
+                            <p class="text-muted">
+                                <i class="fas fa-envelope text-primary me-1"></i>@Model.Email
+                            </p>
+                        </div>
+
+                        <div class="col-md-6">
+                            <strong><i class="fas fa-map-marker-alt me-2"></i>Adresse de Livraison</strong>
+                            <p class="text-muted">@Model.Address</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Articles Commandés -->
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">
+                        <i class="fas fa-list me-2"></i>Articles Commandés
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Produit</th>
+                                    <th>Quantité</th>
+                                    <th>Prix Unitaire</th>
+                                    <th>Total</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var item in Model.Items)
+                                {
+                                    <tr>
+                                        <td><strong>@item.ProductName</strong></td>
+                                        <td>@item.Quantity</td>
+                                        <td>@item.Price.ToString("F2") DT</td>
+                                        <td><strong>@((item.Price * item.Quantity).ToString("F2")) DT</strong></td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Actions -->
+            <div class="mb-4">
+                <a href="@Url.Action("MyOrders", "Orders")" class="btn btn-primary">
+                    <i class="fas fa-history me-2"></i>Voir Mes Commandes
+                </a>
+                <a href="@Url.Action("Index", "Product")" class="btn btn-outline-primary">
+                    <i class="fas fa-shopping-cart me-2"></i>Continuer mes Achats
+                </a>
+            </div>
+        </div>
+
+        <!-- Sidebar Notifications et Conseils -->
+        <div class="col-lg-4">
+            <!-- Notification -->
+            <div class="card shadow-sm border-success mb-4">
+                <div class="card-body text-center">
+                    <div style="font-size: 3rem; margin-bottom: 1rem;">
+                        ✅
+                    </div>
+                    <h5 class="card-title">Commande Reçue</h5>
+                    <p class="card-text text-muted">
+                        Vous allez recevoir un email de confirmation dans les prochaines minutes avec tous les détails.
+                    </p>
+                </div>
+            </div>
+
+            <!-- Prochaines Étapes -->
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-info text-white">
+                    <strong><i class="fas fa-tasks me-2"></i>Prochaines Étapes</strong>
+                </div>
+                <div class="list-group list-group-flush">
+                    <div class="list-group-item">
+                        <div class="d-flex w-100">
+                            <div class="badge bg-primary me-2" style="height: fit-content;">1</div>
+                            <div>
+                                <h6 class="mb-1">Confirmation de Paiement</h6>
+                                <small class="text-muted">@(Model.PaymentMethod == "COD" ? "Vous paierez à la livraison" : "Le paiement a été traité")</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="list-group-item">
+                        <div class="d-flex w-100">
+                            <div class="badge bg-primary me-2" style="height: fit-content;">2</div>
+                            <div>
+                                <h6 class="mb-1">Préparation</h6>
+                                <small class="text-muted">Nous préparons votre colis (1-2 jours)</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="list-group-item">
+                        <div class="d-flex w-100">
+                            <div class="badge bg-primary me-2" style="height: fit-content;">3</div>
+                            <div>
+                                <h6 class="mb-1">Expédition</h6>
+                                <small class="text-muted">Suivi du colis fourni par email</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="list-group-item">
+                        <div class="d-flex w-100">
+                            <div class="badge bg-primary me-2" style="height: fit-content;">4</div>
+                            <div>
+                                <h6 class="mb-1">Livraison</h6>
+                                <small class="text-muted">Réception du colis (3-5 jours)</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Questions? -->
+            <div class="card shadow-sm bg-light">
+                <div class="card-body text-center">
+                    <i class="fas fa-question-circle fs-3 text-primary mb-2 d-block"></i>
+                    <h6 class="card-title">Des Questions?</h6>
+                    <p class="card-text small text-muted mb-3">
+                        Consultez notre centre d'aide ou contactez notre support.
+                    </p>
+                    <a href="#" class="btn btn-sm btn-outline-primary">
+                        <i class="fas fa-envelope me-1"></i>Contacter le Support
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .detail-row {
+        display: flex;
+        justify-content: space-between;
+        padding: 0.75rem 0;
+        border-bottom: 1px solid #e9ecef;
+    }
+
+    .detail-label {
+        font-weight: 600;
+        color: #6c757d;
+    }
+
+    .detail-value {
+        color: #212529;
+    }
+
+    dl {
+        margin-bottom: 0;
+    }
+
+    dt {
+        font-size: 0.875rem;
+    }
+
+    dd {
+        margin-left: 0;
+        margin-bottom: 0.5rem;
+    }
+</style>

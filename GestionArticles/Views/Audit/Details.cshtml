@@ -1,0 +1,123 @@
+@model GestionArticles.Models.Audit.AuditLog
+@using System.Text.Json
+@{
+    ViewData["Title"] = "Détails de l'action";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+
+    Dictionary<string, object>? oldData = null;
+    Dictionary<string, object>? newData = null;
+    try
+    {
+        if (!string.IsNullOrWhiteSpace(Model.OldValues))
+            oldData = JsonSerializer.Deserialize<Dictionary<string, object>>(Model.OldValues);
+        if (!string.IsNullOrWhiteSpace(Model.NewValues))
+            newData = JsonSerializer.Deserialize<Dictionary<string, object>>(Model.NewValues);
+    }
+    catch { /* Ignore parsing errors */ }
+
+    var allKeys = (oldData?.Keys ?? Enumerable.Empty<string>())
+        .Union(newData?.Keys ?? Enumerable.Empty<string>())
+        .Distinct()
+        .OrderBy(k => k)
+        .ToList();
+}
+
+<div class="container py-4">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h2><i class="fas fa-file-alt me-2"></i>Détails de l'action</h2>
+        <a href="@Url.Action("Index", "Audit")" class="btn btn-outline-secondary">
+            <i class="fas fa-arrow-left me-1"></i>Retour
+        </a>
+    </div>
+
+    <div class="card shadow-sm mb-4">
+        <div class="card-body">
+            <dl class="row mb-0">
+                <dt class="col-sm-3">Date/Heure</dt>
+                <dd class="col-sm-9">@Model.Timestamp.ToString("dd/MM/yyyy HH:mm:ss")</dd>
+
+                <dt class="col-sm-3">Utilisateur</dt>
+                <dd class="col-sm-9"><span class="badge bg-secondary">@Model.UserEmail</span></dd>
+
+                <dt class="col-sm-3">Action</dt>
+                <dd class="col-sm-9">
+                    <span class="badge bg-primary">@Model.ActionType</span>
+                </dd>
+
+                <dt class="col-sm-3">Type</dt>
+                <dd class="col-sm-9">@Model.EntityType</dd>
+
+                <dt class="col-sm-3">Entité</dt>
+                <dd class="col-sm-9"><strong>@Model.EntityName</strong> <small>(ID: @Model.EntityId)</small></dd>
+            </dl>
+        </div>
+    </div>
+
+    @if (allKeys.Any())
+    {
+        <div class="card shadow-sm">
+            <div class="card-header bg-light fw-semibold">
+                Comparaison des valeurs
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-sm mb-0 align-middle">
+                        <thead class="table-dark">
+                            <tr>
+                                <th style="width:25%">Champ</th>
+                                <th style="width:30%">Ancienne valeur</th>
+                                <th style="width:30%">Nouvelle valeur</th>
+                                <th style="width:15%">État</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        @foreach (var key in allKeys)
+                        {
+                            var oldVal = oldData != null && oldData.ContainsKey(key) ? oldData[key] : null;
+                            var newVal = newData != null && newData.ContainsKey(key) ? newData[key] : null;
+                            bool changed = (oldVal?.ToString() ?? "") != (newVal?.ToString() ?? "");
+                            string rowClass = changed ? "table-warning" : "";
+                            <tr class="@rowClass">
+                                <td><strong>@key</strong></td>
+                                <td class="text-muted">@DisplayValue(oldVal)</td>
+                                <td>@DisplayValue(newVal)</td>
+                                <td>
+                                    @if (changed)
+                                    {
+                                        <span class="badge bg-warning text-dark"><i class="fas fa-exchange-alt me-1"></i>Modifié</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-success"><i class="fas fa-check me-1"></i>Identique</span>
+                                    }
+                                </td>
+                            </tr>
+                        }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    }
+    else
+    {
+        <div class="alert alert-info">
+            Aucune valeur détaillée à afficher pour cette action.
+        </div>
+    }
+</div>
+
+@functions {
+    private string DisplayValue(object? v)
+    {
+        if (v == null) return "(null)";
+        // Format numeric
+        if (decimal.TryParse(v.ToString(), out var num))
+        {
+            // Display integers without decimals
+            if (num == Math.Truncate(num)) return num.ToString("N0");
+            return num.ToString("N2");
+        }
+        return v.ToString();
+    }
+}

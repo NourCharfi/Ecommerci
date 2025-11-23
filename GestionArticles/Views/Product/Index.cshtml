@@ -1,0 +1,201 @@
+﻿@model IEnumerable<GestionArticles.Models.Product>
+@using GestionArticles.ViewModels
+@inject GestionArticles.Services.IDiscountService DiscountService
+@{
+    ViewData["Title"] = "Nos Produits";
+    var favIds = ViewBag.FavIds as HashSet<int> ?? new HashSet<int>();
+}
+
+<style>
+    .page-header {
+        background: linear-gradient(135deg, #f1f5f9 0%, #f8fafc 100%);
+        padding: 2.5rem 0;
+        margin: -1rem -1rem 2rem;
+        border-bottom: 1px solid #e2e8f0;
+    }
+    
+    .filter-sidebar {
+        position: sticky;
+        top: 120px;
+    }
+    
+    .no-products {
+        text-align: center;
+        padding: 4rem 2rem;
+        background: linear-gradient(135deg, #f1f5f9 0%, #f8fafc 100%);
+        border-radius: 14px;
+        border: 1px solid #e2e8f0;
+    }
+</style>
+
+<!-- Page Header -->
+<div class="page-header">
+    <div class="container-fluid">
+        <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
+            <div>
+                <h1 class="mb-2 fw-800">
+                    <i class="fas fa-box-open me-2 text-secondary"></i> Nos Produits
+                </h1>
+                <p class="text-muted mb-0">Découvrez notre sélection premium de qualité supérieure</p>
+            </div>
+            @if (ViewBag.CategoryId != null)
+            {
+                <a asp-action="Index" class="btn btn-outline-primary">
+                    <i class="fas fa-times me-2"></i> Effacer le filtre
+                </a>
+            }
+        </div>
+    </div>
+</div>
+
+<!-- Products Section -->
+<div class="container-fluid">
+    @if (Model.Any())
+    {
+        <!-- Products Grid -->
+        <div class="product-grid">
+            @foreach (var product in Model)
+            {
+                var photoPath = "~/images/" + (product.Image ?? "noimage.jpg");
+                var isFav = favIds.Contains(product.ProductId);
+                var stockStatus = product.QteStock == 0 ? "out" : (product.QteStock <= 20 ? "low" : "ok");
+                var discount = DiscountService.GetApplicableDiscount(product);
+                var vm = ProductWithDiscountViewModel.FromProduct(product, discount);
+                var hasDiscount = vm.HasDiscount && vm.DiscountedPrice < (decimal)vm.OriginalPrice;
+                
+                <div class="product-card fade-in position-relative">
+                    <!-- Product Image -->
+                    <div class="product-card-image-wrapper position-relative">
+                        <img class="product-card-image" src="@photoPath" asp-append-version="true" alt="@product.Name" />
+
+                        <!-- Badge Remise -->
+                        <partial name="_ProductDiscountBadge" model="vm" />
+                        
+                        <!-- Promo Info -->
+                        <partial name="_PromoInfo" model="vm" />
+
+                        <!-- Favorite Button -->
+                        <div class="product-actions">
+                            <button class="product-action-btn FavoriteToggle @(isFav ? "active" : "")" 
+                                    data-id="@product.ProductId" 
+                                    title="@(isFav ? "Retirer des favoris" : "Ajouter aux favoris")">
+                                <i class="@(isFav ? "fas fa-heart" : "far fa-heart")"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Product Info -->
+                    <div class="product-card-body">
+                        <div class="product-category">
+                            @(product.Category?.CategoryName ?? "Non catégorisé")
+                        </div>
+                        <h3 class="product-title">@product.Name</h3>
+
+                        <!-- Stock Status -->
+                        <div class="product-stock mb-3">
+                            <span class="stock-indicator @stockStatus"></span>
+                            @if (product.QteStock == 0)
+                            {
+                                <span class="text-danger fw-semibold">Rupture de stock</span>
+                            }
+                            else if (product.QteStock <= 20)
+                            {
+                                <span class="text-warning fw-semibold">Plus que @product.QteStock en stock</span>
+                            }
+                            else
+                            {
+                                <span class="text-success fw-semibold">En stock (@product.QteStock)</span>
+                            }
+                        </div>
+
+                        <!-- Prix -->
+                        @if (hasDiscount)
+                        {
+                            <div class="mb-3">
+                                <span class="text-muted text-decoration-line-through small">@vm.OriginalPrice.ToString("F2") DT</span>
+                                <span class="ms-2 fw-bold" style="color: var(--secondary-color);">@vm.DiscountedPrice.ToString("F2") DT</span>
+                                <div class="small text-success"><i class="fas fa-check-circle me-1"></i>Économie: @vm.DiscountAmount.ToString("F2") DT</div>
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="product-price">@product.Price.ToString("F2") DT</div>
+                        }
+                    </div>
+
+                    <!-- Product Actions -->
+                    <div class="product-card-footer">
+                        <div class="d-flex gap-2">
+                            <a asp-action="Details" asp-route-id="@product.ProductId" 
+                               class="btn btn-outline-primary flex-fill">
+                                <i class="fas fa-eye me-2"></i> Détails
+                            </a>
+                            @if (product.QteStock > 0)
+                            {
+                                <a asp-controller="Panier" asp-action="AddProduct" asp-route-id="@product.ProductId" 
+                                   class="btn btn-primary flex-fill">
+                                    <i class="fas fa-cart-plus me-2"></i> Ajouter
+                                </a>
+                            }
+                            else
+                            {
+                                <button class="btn btn-secondary flex-fill" disabled>
+                                    <i class="fas fa-ban me-2"></i> Indisponible
+                                </button>
+                            }
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+
+        <!-- Pagination -->
+        @if (ViewBag.TotalPages > 1)
+        {
+            <nav class="mt-5 mb-5">
+                <ul class="pagination">
+                    @for (int i = 1; i <= ViewBag.TotalPages; i++)
+                    {
+                        <li class="page-item @(i == (ViewBag.CurrentPage ?? 1) ? "active" : "")">
+                            <a class="page-link" 
+                               asp-action="Index" 
+                               asp-route-categoryId="@ViewBag.CategoryId"
+                               asp-route-page="@i">
+                                @i
+                            </a>
+                        </li>
+                    }
+                </ul>
+            </nav>
+        }
+    }
+    else
+    {
+        <!-- No Products Message -->
+        <div class="no-products">
+            <div class="mb-4">
+                <i class="fas fa-box-open fa-5x text-muted opacity-50"></i>
+            </div>
+            <h3 class="text-muted mb-2">Aucun produit trouvé</h3>
+            <p class="text-muted mb-4">Essayez de modifier vos critères de recherche ou explorez d'autres catégories</p>
+            <a asp-action="Index" class="btn btn-primary btn-lg">
+                <i class="fas fa-redo me-2"></i> Voir tous les produits
+            </a>
+        </div>
+    }
+</div>
+
+@section Scripts {
+    <script>
+        // Intersection Observer for animations
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => { 
+                if (entry.isIntersecting) { 
+                    entry.target.classList.add('slideUp'); 
+                } 
+            });
+        }, { threshold: 0.1 });
+        
+        document.querySelectorAll('.product-card').forEach(card => observer.observe(card));
+    </script>
+}

@@ -1,0 +1,347 @@
+﻿@model GestionArticles.ViewModels.Panier.OrderViewModel
+@{
+    ViewData["Title"] = "Checkout - Passer la Commande";
+}
+
+@inject GestionArticles.Services.IDiscountService DiscountService
+
+<div class="container-fluid py-4">
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <h2><i class="fas fa-shopping-cart me-2"></i>Finaliser votre Commande</h2>
+        </div>
+    </div>
+
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <i class="fas fa-exclamation-circle me-2"></i>
+            @TempData["ErrorMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            <i class="fas fa-check-circle me-2"></i>
+            @TempData["SuccessMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    <div class="row">
+        <!-- Formulaire de Commande -->
+        <div class="col-lg-7">
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-primary text-white">
+                    <strong><i class="fas fa-user me-2"></i>Informations Personnelles</strong>
+                </div>
+                <div class="card-body">
+                    <form id="checkoutForm" asp-action="Checkout" method="post">
+                        @Html.AntiForgeryToken()
+
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="FirstName" class="form-label fw-600">
+                                    <i class="fas fa-user me-1"></i>Prénom *
+                                </label>
+                                <input type="text" class="form-control" id="FirstName" name="FirstName" 
+                                       value="@Model.FirstName" placeholder="Jean" required />
+                            </div>
+                            <div class="col-md-6">
+                                <label for="LastName" class="form-label fw-600">
+                                    <i class="fas fa-user me-1"></i>Nom *
+                                </label>
+                                <input type="text" class="form-control" id="LastName" name="LastName" 
+                                       value="@Model.LastName" placeholder="Dupont" required />
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="Phone" class="form-label fw-600">
+                                <i class="fas fa-phone me-1"></i>Téléphone *
+                            </label>
+                            <input type="tel" class="form-control" id="Phone" name="Phone" 
+                                   value="@Model.Phone" placeholder="+216 00 000 000" required />
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="Address" class="form-label fw-600">
+                                <i class="fas fa-map-marker-alt me-1"></i>Adresse de Livraison *
+                            </label>
+                            <input type="text" class="form-control" id="Address" name="Address" 
+                                   value="@Model.Address" placeholder="Adresse complète" required />
+                        </div>
+
+                        <!-- Méthode de Paiement -->
+                        <div class="mb-4">
+                            <label for="PaymentMethod" class="form-label fw-600">
+                                <i class="fas fa-credit-card me-1"></i>Méthode de Paiement *
+                            </label>
+                            <select class="form-control form-select" id="PaymentMethod" name="PaymentMethod" required>
+                                <option value="">-- Sélectionnez une méthode --</option>
+                                <option value="COD">💳 Paiement à la Livraison (COD)</option>
+                                <option value="CARD">🔒 Paiement par Carte (Stripe)</option>
+                                <option value="PAYPAL">🅿️ Paiement par PayPal</option>
+                            </select>
+                        </div>
+
+                        <!-- Montant Total -->
+                        <div class="card bg-light mb-4">
+                            <div class="card-body">
+                                <div class="row align-items-center">
+                                    <div class="col">
+                                        <p class="mb-0 text-muted">Sous-total:</p>
+                                        <p class="mb-0">Frais de livraison:</p>
+                                        <h5 class="mb-0 text-primary fw-bold">Total à payer:</h5>
+                                    </div>
+                                    <div class="col text-end">
+                                        <p class="mb-0" id="displaySubtotal">-</p>
+                                        <p class="mb-0" id="displayFee">-</p>
+                                        <h5 class="mb-0 text-primary fw-bold" id="displayTotal">-</h5>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Hidden Fields -->
+                        @for (int i = 0; i < Model.CartItems.Count; i++)
+                        {
+                            <input type="hidden" name="CartItems[@i].ProductName" value="@Model.CartItems[i].ProductName" />
+                            <input type="hidden" name="CartItems[@i].Quantity" value="@Model.CartItems[i].Quantity" />
+                            <input type="hidden" name="CartItems[@i].Price" value="@Model.CartItems[i].Price" />
+                        }
+                        <input type="hidden" name="TotalAmount" id="TotalAmount" value="@Model.TotalAmount" />
+                        <input type="hidden" name="DeliveryFee" id="DeliveryFee" value="@Model.DeliveryFee" />
+
+                        <!-- Boutons d'Action -->
+                        <div class="d-grid gap-2">
+                            <button type="button" id="confirmBtn" class="btn btn-primary btn-lg">
+                                <i class="fas fa-check me-2"></i>Confirmer la Commande
+                            </button>
+                            <a href="@Url.Action("Index", "Panier")" class="btn btn-secondary">
+                                <i class="fas fa-arrow-left me-2"></i>Retour au Panier
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Résumé du Panier -->
+        <div class="col-lg-5">
+            <div class="card shadow-sm sticky-top" style="top: 100px;">
+                <div class="card-header bg-primary text-white">
+                    <strong><i class="fas fa-list me-2"></i>Récapitulatif Panier</strong>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-sm table-hover">
+                            <thead class="table-light">
+                                <tr>
+                                    <th style="width: 35%"><i class="fas fa-box me-1"></i>Produit</th>
+                                    <th style="width: 15%"><i class="fas fa-cubes me-1"></i>Qté</th>
+                                    <th style="width: 25%"><i class="fas fa-tag me-1"></i>Prix</th>
+                                    <th style="width: 25%"><i class="fas fa-calculator me-1"></i>Total</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var item in Model.CartItems)
+                                {
+                                    <tr>
+                                        <td>
+                                            <small><strong>@item.ProductName</strong></small>
+                                        </td>
+                                        <td>
+                                            <small><span class="badge bg-secondary">@item.Quantity</span></small>
+                                        </td>
+                                        <td>
+                                            @if (item.DiscountedUnitPrice.HasValue)
+                                            {
+                                                <small>
+                                                    <span class="text-decoration-line-through text-muted">@item.Price.ToString("N0")</span>
+                                                    <br/>
+                                                    <span class="text-success fw-bold">@item.DiscountedUnitPrice.Value.ToString("N0") DT</span>
+                                                </small>
+                                            }
+                                            else
+                                            {
+                                                <small>@item.Price.ToString("N0") DT</small>
+                                            }
+                                        </td>
+                                        <td>
+                                            <small>
+                                                <strong class="text-primary">
+                                                    @(item.RowTotal.HasValue ? item.RowTotal.Value.ToString("N0") : (item.Price * item.Quantity).ToString("N0")) DT
+                                                </strong>
+                                                @if (item.FreeUnits.HasValue && item.FreeUnits.Value > 0)
+                                                {
+                                                    <div class="text-info mt-1">
+                                                        <i class="fas fa-gift me-1"></i>+@item.FreeUnits.Value gratuit
+                                                    </div>
+                                                }
+                                                @if (item.Savings.HasValue && item.Savings.Value > 0)
+                                                {
+                                                    <div class="text-success small mt-1">
+                                                        <i class="fas fa-check me-1"></i>Économie: @item.Savings.Value.ToString("N0")
+                                                    </div>
+                                                }
+                                            </small>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <hr />
+
+                    <!-- Récapitulatif Montants -->
+                    <div class="mb-3">
+                        <div class="d-flex justify-content-between mb-2">
+                            <span><i class="fas fa-calculator me-2"></i>Sous-total:</span>
+                            <strong id="summarySubtotal">-</strong>
+                        </div>
+                        <div class="d-flex justify-content-between mb-3">
+                            <span><i class="fas fa-truck me-2"></i>Frais de livraison:</span>
+                            <strong id="summaryFee">-</strong>
+                        </div>
+                        <div class="border-top pt-3">
+                            <div class="d-flex justify-content-between">
+                                <h5 class="mb-0"><i class="fas fa-coins me-2"></i>Total:</h5>
+                                <h5 class="mb-0 text-primary" id="summaryTotal">-</h5>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="alert alert-info alert-sm" id="paymentInfo" style="display: none;">
+                        <i class="fas fa-lock me-2"></i>
+                        <small>Paiement sécurisé via Stripe</small>
+                    </div>
+
+                    <div class="alert alert-info alert-sm" id="paypalInfo" style="display: none;">
+                        <i class="fas fa-shield-alt me-2"></i>
+                        <small>Redirection vers PayPal</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal de Confirmation -->
+<div class="modal fade" id="confirmModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title"><i class="fas fa-check-circle me-2"></i>Confirmation de Commande</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p class="mb-3"><i class="fas fa-info-circle text-info me-2"></i><strong>Vérifiez vos informations:</strong></p>
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <small class="text-muted">Prénom</small>
+                        <div id="modalFirstName" class="fw-bold">-</div>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <small class="text-muted">Nom</small>
+                        <div id="modalLastName" class="fw-bold">-</div>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <small class="text-muted">Téléphone</small>
+                        <div id="modalPhone" class="fw-bold">-</div>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <small class="text-muted">Adresse</small>
+                        <div id="modalAddress" class="fw-bold">-</div>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <small class="text-muted">Méthode de Paiement</small>
+                        <div id="modalPaymentMethod" class="fw-bold">-</div>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <small class="text-muted">Montant Total</small>
+                        <div id="modalTotal" class="fw-bold text-primary" style="font-size: 1.2rem;">-</div>
+                    </div>
+                </div>
+
+                <div class="alert alert-warning" id="stripeWarning" style="display: none;">
+                    <i class="fas fa-credit-card me-2"></i><strong>Paiement par Carte:</strong> Vous serez redirigé vers Stripe
+                </div>
+                <div class="alert alert-info" id="paypalWarning" style="display: none;">
+                    <i class="fas fa-paypal me-2"></i><strong>Paiement PayPal:</strong> Vous serez redirigé vers PayPal
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    <i class="fas fa-times me-2"></i>Annuler
+                </button>
+                <button type="button" id="submitOrder" class="btn btn-primary btn-lg">
+                    <i class="fas fa-check me-2"></i>Confirmer et Payer
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .fw-600 { font-weight: 600; }
+    .form-control:focus, .form-select:focus { border-color: #667eea; box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.15); }
+    .sticky-top { z-index: 10; }
+    .table-hover tbody tr:hover { background-color: #f8f9fa; }
+    .alert-sm { padding: 0.5rem 0.75rem; margin-bottom: 0; font-size: 0.875rem; }
+</style>
+
+@section Scripts {
+<script>
+(function(){
+    function n(v){ return parseFloat(v)||0; }
+    function fmt(x){ return new Intl.NumberFormat('fr-FR',{minimumFractionDigits:0,maximumFractionDigits:0}).format(x)+' DT'; }
+    function update(){
+        var subtotal = n($('#TotalAmount').val());
+        var fee = n($('#DeliveryFee').val());
+        var total = subtotal + fee;
+        $('#displaySubtotal').text(fmt(subtotal));
+        $('#displayFee').text(fmt(fee));
+        $('#displayTotal').text(fmt(total));
+        $('#summarySubtotal').text(fmt(subtotal));
+        $('#summaryFee').text(fmt(fee));
+        $('#summaryTotal').text(fmt(total));
+        $('#modalTotal').text(fmt(total));
+    }
+    function showConfirm(){
+        $('#modalFirstName').text($('#FirstName').val() || '-');
+        $('#modalLastName').text($('#LastName').val() || '-');
+        $('#modalPhone').text($('#Phone').val() || '-');
+        $('#modalAddress').text($('#Address').val() || '-');
+        var pm = $('#PaymentMethod').val();
+        var txt = pm==='COD'?'💳 Paiement à la Livraison': pm==='CARD'?'🔒 Carte (Stripe)':'🅿️ PayPal';
+        $('#modalPaymentMethod').text(txt);
+        $('#stripeWarning').toggle(pm==='CARD');
+        $('#paypalWarning').toggle(pm==='PAYPAL');
+        $('#paymentInfo').toggle(pm==='CARD');
+        update();
+        new bootstrap.Modal(document.getElementById('confirmModal')).show();
+    }
+    $(function(){
+        update();
+        $('#confirmBtn').on('click', function(){
+            var f=document.getElementById('checkoutForm');
+            if(!f.checkValidity()){ f.reportValidity(); return; }
+            showConfirm();
+        });
+        $('#submitOrder').on('click', function(){
+            var subtotal=n($('#TotalAmount').val());
+            var fee=n($('#DeliveryFee').val());
+            $('#TotalAmount').val(subtotal+fee);
+            if($('#PaymentMethod').val()==='CARD'){
+                $('#checkoutForm').append('<input type="hidden" name="IsPaymentRedirect" value="true" />');
+            }
+            $('#checkoutForm').submit();
+        });
+    });
+})();
+</script>
+}

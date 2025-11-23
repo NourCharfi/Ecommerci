@@ -1,0 +1,64 @@
+@model GestionArticles.ViewModels.Payment.PaymentViewModel
+@{
+    ViewData["Title"] = "Paiement Manuel - ECommerci.tn";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<div class="container py-4">
+    <div class="row mb-3">
+        <div class="col-md-8 offset-md-2">
+            <h2><i class="fas fa-credit-card me-2"></i>Paiement manuel (simulation)</h2>
+            <div class="alert alert-warning"><i class="fas fa-exclamation-triangle me-2"></i><strong>Démo uniquement:</strong> Ne jamais stocker les numéros de carte complets en production sans conformité PCI-DSS.</div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-8 offset-md-2">
+            <div class="card shadow-sm">
+                <div class="card-header bg-primary text-white">Commande #@Model.OrderId – Total: @Model.TotalAmount.ToString("F2") DT</div>
+                <div class="card-body">
+                    <form asp-action="Manual" method="post">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" asp-for="OrderId" />
+                        <input type="hidden" asp-for="TotalAmount" />
+                        <div class="mb-3">
+                            <label class="form-label">Titulaire de la carte</label>
+                            <input asp-for="CardholderName" class="form-control" placeholder="Nom complet" />
+                            <span class="text-danger" asp-validation-for="CardholderName"></span>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Numéro de carte</label>
+                            <input asp-for="CardNumber" class="form-control" placeholder="4111 1111 1111 1111" />
+                            <span class="text-danger" asp-validation-for="CardNumber"></span>
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col-md-4">
+                                <label class="form-label">Expiration (MM/AA)</label>
+                                <input asp-for="CardExpiry" class="form-control" placeholder="12/27" />
+                                <span class="text-danger" asp-validation-for="CardExpiry"></span>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">CVC</label>
+                                <input asp-for="CardCVC" class="form-control" placeholder="123" />
+                                <span class="text-danger" asp-validation-for="CardCVC"></span>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">Téléphone</label>
+                                <input asp-for="PhoneNumber" class="form-control" placeholder="0601020304" />
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Email</label>
+                            <input asp-for="Email" class="form-control" />
+                            <span class="text-danger" asp-validation-for="Email"></span>
+                        </div>
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-success btn-lg"><i class="fas fa-check me-2"></i>Payer @Model.TotalAmount.ToString("F2") DT</button>
+                            <a asp-controller="Panier" asp-action="Index" class="btn btn-secondary"><i class="fas fa-arrow-left me-2"></i>Retour au panier</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            <div class="alert alert-info mt-3"><i class="fas fa-info-circle me-2"></i>Ce flux confirme simplement la commande et génère les notifications internes.</div>
+        </div>
+    </div>
+</div>
+@section Scripts { @await Html.PartialAsync("_ValidationScriptsPartial") }

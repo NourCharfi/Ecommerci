@@ -1,0 +1,41 @@
+@model IEnumerable<GestionArticles.Models.Orders.Order>
+
+@{
+    ViewData["Title"] = "Mes commandes";
+}
+
+<h2>Mes commandes</h2>
+
+@if (Model == null || !Model.Any())
+{
+    <div class="alert alert-info">Vous n'avez pas encore de commande.</div>
+}
+else
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Id</th>
+                <th>Total</th>
+                <th>Date</th>
+                <th>Statut</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach(var o in Model)
+            {
+                <tr>
+                    <td>@o.Id</td>
+                    <td>@PriceFormatter.FormatPrice((decimal)o.TotalAmount)</td>
+                    <td>@o.OrderDate.ToString("dd/MM/yyyy HH:mm")</td>
+                    <td>@o.Status</td>
+                    <td>
+                        <a asp-action="Details" asp-route-id="@o.Id" class="btn btn-sm btn-info">Détails</a>
+                        <a asp-action="Print" asp-route-id="@o.Id" class="btn btn-sm btn-secondary ms-1" target="_blank">Imprimer</a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}

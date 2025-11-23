@@ -1,0 +1,148 @@
+@model GestionArticles.Models.Orders.Order
+@using GestionArticles.Models.Orders
+@{
+    Layout = null; // no site chrome for print
+    string statusLabel = Model.Status switch {
+        OrderStatus.Processing => "En traitement",
+        OrderStatus.Paid => "Payée",
+        OrderStatus.Preparing => "Préparation",
+        OrderStatus.Shipping => "Expédition",
+        OrderStatus.Delivered => "Livrée",
+        OrderStatus.Confirmed => "Confirmée",
+        _ => "Statut inconnu"
+    };
+}
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title>Commande #@Model.Id - Impression</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root { --primary-color:#1e293b; --secondary-color:#0ea5e9; --accent-color:#14b8a6; --success-color:#10b981; --warning-color:#f59e0b; --danger-color:#ef4444; --light-bg:#f8fafc; --border-color:#e2e8f0; --text-dark:#1e293b; --text-medium:#475569; --text-light:#64748b; }
+        * { margin:0; padding:0; box-sizing:border-box; }
+        body { font-family:'Inter',Arial,Helvetica,sans-serif; background:#f1f5f9; padding:20px; color:var(--text-dark); line-height:1.6; }
+        .print-wrapper { max-width:950px; margin:0 auto; padding:40px; background:#fff; border-radius:16px; box-shadow:0 10px 30px rgba(0,0,0,.1); border:1px solid var(--border-color); }
+        .header { display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:30px; padding-bottom:20px; border-bottom:2px solid var(--secondary-color); }
+        .header-left h1 { font-size:2rem; font-weight:800; color:var(--primary-color); margin-bottom:8px; letter-spacing:-.02em; }
+        .order-status { display:inline-block; padding:6px 12px; border-radius:20px; background:var(--success-color); color:#fff; font-size:.85rem; font-weight:600; text-transform:uppercase; letter-spacing:.05em; margin-top:8px; }
+        .meta { color:var(--text-light); font-size:.95rem; margin-top:4px; }
+        .header-right { text-align:right; }
+        .company-name { font-size:1.5rem; font-weight:800; color:var(--secondary-color); margin-bottom:4px; }
+        .company-website { color:var(--text-light); font-size:.9rem; }
+        .info-section { display:flex; gap:30px; margin-bottom:30px; }
+        .info-block { flex:1; background:var(--light-bg); padding:20px; border-radius:12px; border-left:4px solid var(--secondary-color); }
+        .info-block:nth-child(2){ border-left-color:var(--accent-color); }
+        .info-block-title { font-size:.85rem; font-weight:700; color:var(--primary-color); margin-bottom:12px; text-transform:uppercase; letter-spacing:.05em; }
+        .info-block-content { display:flex; flex-direction:column; gap:6px; }
+        .info-line { font-size:.95rem; color:var(--text-dark); word-break:break-word; }
+        .info-line.email { color:var(--secondary-color); font-weight:500; }
+        .info-line.phone { color:var(--text-medium); font-size:.9rem; }
+        .items-section h3 { font-size:1.25rem; font-weight:700; color:var(--primary-color); margin-top:30px; margin-bottom:16px; padding-bottom:12px; border-bottom:2px solid var(--border-color); }
+        table { width:100%; border-collapse:collapse; background:#fff; }
+        thead { background:var(--primary-color); color:#fff; }
+        th { padding:14px 12px; text-align:left; font-weight:700; font-size:.9rem; text-transform:uppercase; letter-spacing:.05em; }
+        th.text-right { text-align:right; }
+        tbody tr { border-bottom:1px solid var(--border-color); transition:background-color .3s ease; }
+        tbody tr:hover { background-color:var(--light-bg); }
+        tbody tr:last-child { border-bottom:2px solid var(--secondary-color); }
+        td { padding:14px 12px; font-size:.95rem; color:var(--text-dark); }
+        td.text-right { text-align:right; font-weight:600; }
+        td.product-name { font-weight:600; color:var(--primary-color); }
+        td.quantity { text-align:center; background:var(--light-bg); font-weight:600; }
+        td.price { color:var(--secondary-color); font-weight:600; }
+        .summary-section { display:flex; justify-content:flex-end; margin-top:25px; padding-top:20px; }
+        .summary-block { width:100%; max-width:350px; }
+        .summary-row { display:flex; justify-content:space-between; align-items:center; padding:12px 0; border-bottom:1px solid var(--border-color); font-size:.95rem; color:var(--text-medium); }
+        .summary-row.total { border-bottom:none; border-top:2px solid var(--secondary-color); padding-top:16px; margin-top:16px; font-size:1.25rem; font-weight:800; color:var(--primary-color); }
+        .summary-row.total .value { color:var(--secondary-color); font-size:1.4rem; font-weight:800; }
+        .footer-actions { margin-top:30px; display:flex; justify-content:flex-end; gap:12px; padding-top:20px; border-top:1px solid var(--border-color); }
+        .btn { display:inline-flex; align-items:center; justify-content:center; padding:11px 24px; border-radius:8px; border:none; cursor:pointer; font-weight:600; font-size:.95rem; transition:all .3s ease; text-decoration:none; }
+        .btn-print { background:var(--success-color); color:#fff; }
+        .btn-print:hover { transform:translateY(-2px); box-shadow:0 8px 20px rgba(16,185,129,.3); }
+        .btn-secondary { background:var(--light-bg); color:var(--text-dark); border:2px solid var(--border-color); }
+        .btn-secondary:hover { background:var(--border-color); }
+        @@media print { body { background:#fff; padding:0; } .print-wrapper { max-width:100%; margin:0; padding:0; box-shadow:none; border:none; border-radius:0; } .no-print { display:none !important; } @@page { size:A4; margin:12mm; } }
+        @@media (max-width:768px){ .print-wrapper{padding:25px;} .header{flex-direction:column; margin-bottom:20px;} .header-right{text-align:left; margin-top:15px;} .info-section{flex-direction:column; gap:15px;} .footer-actions{flex-direction:column-reverse;} .btn{width:100%;} table{font-size:.85rem;} th,td{padding:10px 8px;} }
+    </style>
+</head>
+<body>
+    <div class="print-wrapper">
+        <div class="header">
+            <div class="header-left">
+                <h1>Commande #@Model.Id</h1>
+                <span class="order-status">@statusLabel</span>
+                <div class="meta">Date: @Model.OrderDate.ToString("dd/MM/yyyy - HH:mm")</div>
+            </div>
+            <div class="header-right">
+                <div class="company-name">ECommerci.tn</div>
+                <div class="company-website">contact@ecommerci.tn</div>
+                <div class="company-website">www.ecommerci.tn</div>
+            </div>
+        </div>
+        <div class="info-section">
+            <div class="info-block">
+                <div class="info-block-title">Informations client</div>
+                <div class="info-block-content">
+                    <div class="info-line"><strong>@Model.CustomerName</strong></div>
+                    @if(!string.IsNullOrEmpty(Model.FirstName) || !string.IsNullOrEmpty(Model.LastName)) { <div class="info-line">@(Model.FirstName + " " + Model.LastName)</div> }
+                    <div class="info-line email">@Model.Email</div>
+                    @if(!string.IsNullOrEmpty(Model.Phone)) { <div class="info-line phone">@Model.Phone</div> }
+                </div>
+            </div>
+            <div class="info-block">
+                <div class="info-block-title">Adresse de livraison</div>
+                <div class="info-block-content">
+                    <div class="info-line">@Model.Address</div>
+                    <div class="info-line" style="margin-top:8px; padding-top:8px; border-top:1px solid #cbd5e1;">
+                        <strong>Statut:</strong> <span style="color:var(--success-color); font-weight:700;">Préparation en cours</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="items-section">
+            <h3>Articles commandés</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Produit</th>
+                        <th style="text-align:center;">Quantité</th>
+                        <th style="text-align:right;">Prix unitaire</th>
+                        <th class="text-right">Sous-total</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach(var it in Model.Items) {
+                        <tr>
+                            <td class="product-name">@it.ProductName</td>
+                            <td class="quantity">@it.Quantity</td>
+                            <td class="price" style="text-align:right;">@PriceFormatter.FormatPrice((decimal)it.Price)</td>
+                            <td class="text-right">@PriceFormatter.FormatPrice((decimal)(it.Price * it.Quantity))</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+        <div class="summary-section">
+            <div class="summary-block">
+                <div class="summary-row">
+                    <span class="label">Sous-total:</span>
+                    <span class="value">@PriceFormatter.FormatPrice((decimal)(Model.TotalAmount - Model.DeliveryFee))</span>
+                </div>
+                <div class="summary-row">
+                    <span class="label">Frais de livraison:</span>
+                    <span class="value">@PriceFormatter.FormatPrice((decimal)Model.DeliveryFee)</span>
+                </div>
+                <div class="summary-row total">
+                    <span class="label">Montant total:</span>
+                    <span class="value">@PriceFormatter.FormatPrice((decimal)Model.TotalAmount)</span>
+                </div>
+            </div>
+        </div>
+        <div class="footer-actions no-print">
+            <button class="btn btn-secondary" onclick="window.close();">Fermer</button>
+            <button class="btn btn-print" onclick="window.print();">Imprimer</button>
+        </div>
+    </div>
+</body>
+</html>

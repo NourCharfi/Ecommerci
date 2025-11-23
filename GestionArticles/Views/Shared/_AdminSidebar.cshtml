@@ -1,0 +1,270 @@
+@using Microsoft.AspNetCore.Identity
+@inject SignInManager<IdentityUser> SignInManager
+@inject GestionArticles.Models.Repositories.IProductRepository ProductRepository
+@inject GestionArticles.Models.Repositories.INotificationRepository NotificationRepository
+@inject GestionArticles.Models.Repositories.IAuditLogRepository AuditRepository
+@inject GestionArticles.Models.Repositories.IDiscountRepository DiscountRepository
+@inject UserManager<IdentityUser> UserManager
+
+@{
+    var lowCount=0; var ruptureCount=0; var deletedCount=0; var auditCount=0; var discountCount=0; var unreadNotificationCount=0; var isAdmin=false; var isManager=false;
+    try{var all=ProductRepository.GetAll(); lowCount=all.Count(p=>p.QteStock>0 && p.QteStock<=20); ruptureCount=all.Count(p=>p.QteStock==0); deletedCount=ProductRepository.GetDeleted().Count; auditCount=AuditRepository.GetAll(500).Count(a=>a.Timestamp>=DateTime.Now.AddDays(-7)); discountCount=DiscountRepository.GetActive().Count; if(SignInManager.IsSignedIn(User)){var user=await UserManager.GetUserAsync(User); if(user!=null){ unreadNotificationCount=NotificationRepository.GetUnreadCount(user.Id); isAdmin=await UserManager.IsInRoleAsync(user,"Admin"); isManager=await UserManager.IsInRoleAsync(user,"Manager"); }}}catch{}
+}
+
+<div class="admin-sidebar-modern">
+    <!-- Logo/Branding -->
+    <div class="sidebar-branding mb-4 pb-3 border-bottom border-light">
+        <div class="small fw-bold text-secondary">Panneau d'administration</div>
+    </div>
+
+    <!-- Navigation Section -->
+    <div class="sidebar-section mb-4">
+        <div class="sidebar-title"><i class="fas fa-compass me-2"></i>Navigation</div>
+        <nav class="nav flex-column" id="adminNav">
+            <a class="nav-link" asp-controller="Dashboard" asp-action="Index">
+                <i class="fas fa-chart-line me-2"></i>
+                <span>Tableau de bord</span>
+            </a>
+            @if(isAdmin){
+                <a class="nav-link" asp-controller="Audit" asp-action="Index">
+                    <i class="fas fa-history me-2"></i>
+                    <span>Journal d'audit</span>
+                    @if(auditCount>0){<span class="badge bg-info ms-auto">@auditCount</span>}
+                </a>
+            }
+            <a class="nav-link" asp-controller="Product" asp-action="AdminIndex">
+                <i class="fas fa-box-open me-2"></i>
+                <span>Produits</span>
+            </a>
+            <a class="nav-link" asp-controller="Category" asp-action="Index">
+                <i class="fas fa-tags me-2"></i>
+                <span>Catégories</span>
+            </a>
+            <a class="nav-link" asp-controller="Stock" asp-action="Index">
+                <i class="fas fa-warehouse me-2"></i>
+                <span>Stock</span>
+                @if(lowCount>0 || ruptureCount>0){
+                    <span class="ms-auto">
+                        @if(lowCount>0){<span class="badge bg-warning text-dark" title="Stock faible">@lowCount</span>} 
+                        @if(ruptureCount>0){<span class="badge bg-danger ms-1" title="Rupture">@ruptureCount</span>}
+                    </span>
+                }
+            </a>
+            @if(isAdmin){
+                <a class="nav-link" asp-controller="Trash" asp-action="Index">
+                    <i class="fas fa-trash me-2"></i>
+                    <span>Corbeille</span>
+                    @if(deletedCount>0){<span class="badge bg-danger ms-auto">@deletedCount</span>}
+                </a>
+            }
+            @if(isAdmin){
+                <a class="nav-link" asp-controller="Discount" asp-action="Index">
+                    <i class="fas fa-percent me-2"></i>
+                    <span>Promotions</span>
+                    @if(discountCount>0){<span class="badge bg-success ms-auto">@discountCount</span>}
+                </a>
+            }
+            <a class="nav-link" asp-controller="Orders" asp-action="Index">
+                <i class="fas fa-shopping-cart me-2"></i>
+                <span>Commandes</span>
+            </a>
+            @if(isAdmin){
+                <a class="nav-link" asp-controller="UserManagement" asp-action="Index">
+                    <i class="fas fa-users me-2"></i>
+                    <span>Utilisateurs</span>
+                </a>
+                <a class="nav-link" asp-controller="Admin" asp-action="ListRoles">
+                    <i class="fas fa-user-shield me-2"></i>
+                    <span>Rôles</span>
+                </a>
+            }
+        </nav>
+    </div>
+
+    <!-- Status Overview Section -->
+    <div class="sidebar-section mb-4">
+        <div class="sidebar-title"><i class="fas fa-chart-pie me-2"></i>Statut du stock</div>
+        <div class="status-grid">
+            <div class="status-item">
+                <span class="status-label">Faible</span>
+                <span class="status-value text-warning">@lowCount</span>
+            </div>
+            <div class="status-item">
+                <span class="status-label">Rupture</span>
+                <span class="status-value text-danger">@ruptureCount</span>
+            </div>
+            <div class="status-item">
+                <span class="status-label">Promos</span>
+                <span class="status-value text-success">@discountCount</span>
+            </div>
+            <div class="status-item">
+                <span class="status-label">Audit 7 j</span>
+                <span class="status-value text-info">@auditCount</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Notifications Section -->
+    @if(unreadNotificationCount>0){
+        <div class="sidebar-section mb-4">
+            <div class="sidebar-title"><i class="fas fa-bell me-2"></i>Notifications</div>
+            <a asp-controller="NotificationPage" asp-action="Index" class="btn btn-primary w-100 btn-sm fw-bold">
+                <i class="fas fa-bell me-1"></i>@unreadNotificationCount Non lue(s)
+            </a>
+        </div>
+    }
+
+    <!-- Footer -->
+    <div class="sidebar-footer mt-auto small text-center pt-3 border-top border-light">
+        <p class="mb-1">© @DateTime.Now.Year</p>
+        <p class="mb-0 text-muted">ECommerci.tn</p>
+    </div>
+</div>
+
+<style>
+.admin-sidebar-modern {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
+    border-right: 1px solid #e2e8f0;
+    padding: 1.5rem 1rem;
+    position: sticky;
+    top: 100px;
+    border-radius: 12px;
+    box-shadow: 0 4px 14px rgba(0,0,0,.05);
+}
+
+.sidebar-branding {
+    text-align: center;
+    padding: 1rem;
+    background: linear-gradient(135deg, #0ea5e9, #14b8a6);
+    border-radius: 8px;
+    color: white;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+}
+
+.sidebar-title {
+    font-size: 0.8rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: #64748b;
+    margin-bottom: 0.75rem;
+    display: flex;
+    align-items: center;
+}
+
+#adminNav .nav-link {
+    color: #475569;
+    font-weight: 600;
+    padding: 0.65rem 0.85rem;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    display: flex;
+    align-items: center;
+    transition: all 240ms ease-in-out;
+    gap: 0.5rem;
+}
+
+#adminNav .nav-link:hover {
+    background: linear-gradient(135deg, #0ea5e9, #14b8a6);
+    color: #ffffff;
+    transform: translateX(4px);
+    box-shadow: 0 4px 12px rgba(14, 165, 233, 0.2);
+}
+
+#adminNav .nav-link.active {
+    background: linear-gradient(135deg, #0ea5e9, #0284c7);
+    color: #ffffff;
+    box-shadow: 0 4px 12px rgba(14, 165, 233, 0.3);
+    font-weight: 700;
+}
+
+#adminNav .nav-link i {
+    width: 20px;
+    text-align: center;
+}
+
+.status-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.75rem;
+}
+
+.status-item {
+    background: linear-gradient(135deg, #ffffff 0%, #f1f5f9 100%);
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 0.75rem 0.6rem;
+    text-align: center;
+    font-size: 0.7rem;
+    box-shadow: 0 2px 4px rgba(0,0,0,.04);
+    transition: all 240ms ease-in-out;
+}
+
+.status-item:hover {
+    border-color: #cbd5e1;
+    box-shadow: 0 4px 8px rgba(0,0,0,.08);
+    transform: translateY(-2px);
+}
+
+.status-label {
+    display: block;
+    color: #64748b;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    margin-bottom: 4px;
+}
+
+.status-value {
+    display: block;
+    font-size: 1.25rem;
+    font-weight: 800;
+}
+
+.sidebar-section {
+    padding-bottom: 1rem;
+}
+
+.sidebar-footer {
+    color: #94a3b8;
+    font-size: 0.8rem;
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, #0ea5e9, #0284c7) !important;
+    border: none;
+}
+
+.btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 12px rgba(14, 165, 233, 0.3);
+}
+
+@@media (max-width: 992px) {
+    .admin-sidebar-modern {
+        top: 0;
+        position: relative;
+        box-shadow: none;
+        border-radius: 0;
+    }
+}
+</style>
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const path = window.location.pathname.toLowerCase();
+        document.querySelectorAll('#adminNav .nav-link').forEach(link => {
+            const href = link.getAttribute('href');
+            if (href && path.includes(href.toLowerCase())) {
+                link.classList.add('active');
+            }
+            link.addEventListener('click', function() {
+                document.querySelectorAll('#adminNav .nav-link.active').forEach(a => a.classList.remove('active'));
+                this.classList.add('active');
+            });
+        });
+    });
+</script>

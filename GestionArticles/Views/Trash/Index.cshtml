@@ -1,0 +1,153 @@
+@model IEnumerable<GestionArticles.Models.Product>
+
+@{
+    ViewData["Title"] = "Corbeille - Produits supprimés";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container-fluid mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1>Corbeille</h1>
+        <a href="@Url.Action("Index", "Product", new { area = "" })" class="btn btn-secondary">
+            <i class="fas fa-arrow-left me-2"></i>Retour aux produits
+        </a>
+    </div>
+
+    @if (Model.Any())
+    {
+        <div class="card shadow-sm">
+            <div class="card-body">
+                <table class="table table-striped table-hover">
+                    <thead class="table-dark">
+                        <tr>
+                            <th>Produit</th>
+                            <th>Prix</th>
+                            <th>Supprimé par</th>
+                            <th>Date suppression</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var product in Model)
+                        {
+                            <tr>
+                                <td>
+                                    <strong>@product.Name</strong>
+                                </td>
+                                <td>@product.Price.ToString("C")</td>
+                                <td>
+                                    @if (!string.IsNullOrEmpty(product.DeletedBy))
+                                    {
+                                        <span class="badge bg-info">@product.DeletedBy</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-secondary">Inconnu</span>
+                                    }
+                                </td>
+                                <td>
+                                    @if (product.DeletedAt.HasValue)
+                                    {
+                                        <small>@product.DeletedAt.Value.ToString("dd/MM/yyyy HH:mm")</small>
+                                    }
+                                </td>
+                                <td class="d-flex gap-2">
+                                    <!-- Restaurer -->
+                                    <button type="button"
+                                            class="btn btn-sm btn-success"
+                                            data-bs-toggle="modal"
+                                            data-bs-target="#confirmModal"
+                                            data-url="@Url.Action("Restore", "Trash", new { id = product.ProductId })"
+                                            data-title="Restaurer le produit"
+                                            data-message="Êtes-vous sûr de vouloir restaurer <strong>@product.Name</strong> ?"
+                                            data-confirm-text="Restaurer"
+                                            data-confirm-class="btn-success">
+                                        <i class="fas fa-undo"></i> Restaurer
+                                    </button>
+
+                                    <!-- Supprimer définitivement -->
+                                    <button type="button"
+                                            class="btn btn-sm btn-danger"
+                                            data-bs-toggle="modal"
+                                            data-bs-target="#confirmModal"
+                                            data-url="@Url.Action("Delete", "Trash", new { id = product.ProductId })"
+                                            data-title="Supprimer définitivement"
+                                            data-message="<strong class='text-danger'>ATTENTION - ACTION IRRÉVERSIBLE !</strong><br/>Êtes-vous absolument sûr de vouloir supprimer définitivement <strong>@product.Name</strong> ?<br/><span class='text-danger'><i class='fas fa-exclamation-circle me-1'></i>Cette action ne peut pas être annulée.</span>"
+                                            data-confirm-text="Supprimer définitivement"
+                                            data-confirm-class="btn-danger">
+                                        <i class="fas fa-trash"></i> Supprimer
+                                    </button>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    }
+    else
+    {
+        <div class="alert alert-info text-center">
+            <i class="fas fa-inbox fs-1 mb-3 d-block"></i>
+            <p>La corbeille est vide</p>
+        </div>
+    }
+</div>
+
+<!-- Modal de confirmation réutilisable -->
+<div class="modal fade" id="confirmModal" tabindex="-1" aria-labelledby="confirmModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="confirmModalLabel"></h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div id="confirmModalMessage"></div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                <form id="confirmForm" method="post" style="display:inline;">
+                    @Html.AntiForgeryToken()
+                    <button type="submit" id="confirmSubmit" class="btn">
+                        Confirmer
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        (function () {
+            const modalEl = document.getElementById('confirmModal');
+            if (!modalEl) return;
+
+            modalEl.addEventListener('show.bs.modal', function (event) {
+                const button = event.relatedTarget;
+                if (!button) return;
+
+                const title = button.getAttribute('data-title') || 'Confirmation';
+                const message = button.getAttribute('data-message') || '';
+                const url = button.getAttribute('data-url');
+                const confirmText = button.getAttribute('data-confirm-text') || 'Confirmer';
+                const confirmClass = button.getAttribute('data-confirm-class') || 'btn-primary';
+
+                const titleEl = modalEl.querySelector('.modal-title');
+                const messageEl = document.getElementById('confirmModalMessage');
+                const formEl = document.getElementById('confirmForm');
+                const submitBtn = document.getElementById('confirmSubmit');
+
+                titleEl.textContent = title;
+                messageEl.innerHTML = message;
+                if (formEl && url) formEl.setAttribute('action', url);
+
+                // Reset submit button classes then apply desired class
+                submitBtn.className = 'btn';
+                submitBtn.classList.add(confirmClass);
+                submitBtn.textContent = confirmText;
+            });
+        })();
+    </script>
+}

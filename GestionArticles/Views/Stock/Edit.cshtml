@@ -1,0 +1,78 @@
+@model GestionArticles.Models.Product
+@{
+    ViewData["Title"] = "Éditer le produit - Stock";
+    var categories = ViewData["Categories"] as IEnumerable<GestionArticles.Models.Category> ?? Enumerable.Empty<GestionArticles.Models.Category>();
+    var photoPath = Url.Content("~/images/" + (Model.Image ?? "noimage.jpg"));
+}
+
+<h2>Modifier le produit (stock)</h2>
+
+@* Show server-side model errors clearly *@
+@if (!ViewData.ModelState.IsValid)
+{
+    <div class="alert alert-danger">
+        <strong>Erreurs de validation :</strong>
+        <ul>
+            @foreach (var ms in ViewData.ModelState.Values.SelectMany(v => v.Errors))
+            {
+                <li>@ms.ErrorMessage</li>
+            }
+        </ul>
+    </div>
+}
+
+<form asp-action="Edit" asp-controller="Stock" asp-route-id="@Model.ProductId" method="post">
+    @Html.AntiForgeryToken()
+
+    <input type="hidden" asp-for="ProductId" />
+    <input type="hidden" asp-for="Image" />
+
+    <div asp-validation-summary="All" class="text-danger"></div>
+
+    <div class="mb-3">
+        <label asp-for="Name" class="form-label">Nom du produit</label>
+        <input asp-for="Name" class="form-control" />
+        <span asp-validation-for="Name" class="text-danger"></span>
+    </div>
+
+    <div class="mb-3 row">
+        <div class="col-md-6">
+            <label asp-for="Price" class="form-label">Prix</label>
+            <input asp-for="Price" class="form-control" />
+            <span asp-validation-for="Price" class="text-danger"></span>
+        </div>
+        <div class="col-md-6">
+            <label asp-for="CategoryId" class="form-label">Catégorie</label>
+            <select asp-for="CategoryId" class="form-select">
+                <option value="">-- Sélectionner --</option>
+                @foreach (var c in categories)
+                {
+                    <option value="@c.CategoryId" selected="@(c.CategoryId == Model.CategoryId ? "selected" : null)">@c.CategoryName</option>
+                }
+            </select>
+            <span asp-validation-for="CategoryId" class="text-danger"></span>
+        </div>
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">Image actuelle</label>
+        <div>
+            <img src="@photoPath" alt="image" style="max-height:150px; max-width:150px; object-fit:cover;" />
+        </div>
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="QteStock" class="form-label">Quantité en stock</label>
+        <input asp-for="QteStock" type="number" min="0" class="form-control" />
+        <span asp-validation-for="QteStock" class="text-danger"></span>
+    </div>
+
+    <div class="d-flex gap-2">
+        <button type="submit" class="btn btn-primary">Enregistrer</button>
+        <a asp-action="Details" asp-controller="Stock" asp-route-id="@Model.ProductId" class="btn btn-secondary">Annuler</a>
+    </div>
+</form>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

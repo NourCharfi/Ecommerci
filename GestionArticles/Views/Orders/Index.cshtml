@@ -1,0 +1,54 @@
+@model IEnumerable<GestionArticles.Models.Orders.Order>
+@using GestionArticles.Helpers
+@{
+    ViewData["Title"] = "Commandes - Administration";
+    string BadgeClass(GestionArticles.Models.Orders.OrderStatus s) => s switch
+    {
+        GestionArticles.Models.Orders.OrderStatus.Processing => "secondary",
+        GestionArticles.Models.Orders.OrderStatus.Preparing => "info",
+        GestionArticles.Models.Orders.OrderStatus.Shipping => "warning",
+        GestionArticles.Models.Orders.OrderStatus.Delivered => "success",
+        GestionArticles.Models.Orders.OrderStatus.Paid => "primary",
+        GestionArticles.Models.Orders.OrderStatus.Confirmed => "success",
+        _ => "light"
+    };
+}
+<h2>Liste des commandes</h2>
+<table class="table datatable" id="ordersTable">
+    <thead>
+        <tr>
+            <th>Id</th>
+            <th>Client</th>
+            <th>Total</th>
+            <th>Date</th>
+            <th>Statut</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var o in Model)
+        {
+            <tr>
+                <td>@o.Id</td>
+                <td>@o.CustomerName</td>
+                <td>@o.TotalAmount.ToString("N0") DT</td>
+                <td>@o.OrderDate.ToString("g")</td>
+                <td><span class="badge bg-@BadgeClass(o.Status)">@o.Status.GetDisplayName()</span></td>
+                <td>
+                    <a asp-action="Details" asp-route-id="@o.Id" class="btn btn-sm btn-info" target="_blank">Détails</a>
+                    <a asp-action="Print" asp-route-id="@o.Id" class="btn btn-sm btn-secondary ms-1" target="_blank">Imprimer</a>
+                    <form asp-action="UpdateStatus" method="post" style="display:inline-block; margin-left:8px;">
+                        <input type="hidden" name="id" value="@o.Id" />
+                        <select name="status" class="form-select d-inline-block" style="width:auto; display:inline-block;">
+                            @foreach (var s in Enum.GetValues(typeof(GestionArticles.Models.Orders.OrderStatus)).Cast<GestionArticles.Models.Orders.OrderStatus>())
+                            {
+                                <option value="@s" selected="@(s == o.Status ? "selected" : null)">@s.GetDisplayName()</option>
+                            }
+                        </select>
+                        <button type="submit" class="btn btn-sm btn-primary">Mettre à jour</button>
+                    </form>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

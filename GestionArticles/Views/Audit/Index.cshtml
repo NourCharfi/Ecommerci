@@ -1,0 +1,143 @@
+@model IEnumerable<GestionArticles.Models.Audit.AuditLog>
+
+@{
+    ViewData["Title"] = "Historique des Actions";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container-fluid mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1>?? Historique des Actions Admin</h1>
+        <a href="@Url.Action("Index", "Admin")" class="btn btn-secondary">
+            <i class="fas fa-arrow-left me-2"></i>Retour
+        </a>
+    </div>
+
+    <!-- Filtres par Période -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <div class="btn-group" role="group">
+                <a href="@Url.Action("Index", "Audit", new { period = "today" })" 
+                   class="btn btn-outline-primary @(ViewBag.SelectedPeriod == "today" ? "active" : "")">
+                    <i class="fas fa-calendar-day me-2"></i>Aujourd'hui
+                </a>
+                <a href="@Url.Action("Index", "Audit", new { period = "week" })" 
+                   class="btn btn-outline-primary @(ViewBag.SelectedPeriod == "week" ? "active" : "")">
+                    <i class="fas fa-calendar-week me-2"></i>Cette semaine
+                </a>
+                <a href="@Url.Action("Index", "Audit", new { period = "month" })" 
+                   class="btn btn-outline-primary @(ViewBag.SelectedPeriod == "month" ? "active" : "")">
+                    <i class="fas fa-calendar-alt me-2"></i>Ce mois
+                </a>
+                <a href="@Url.Action("Index", "Audit", new { period = "year" })" 
+                   class="btn btn-outline-primary @(ViewBag.SelectedPeriod == "year" ? "active" : "")">
+                    <i class="fas fa-calendar me-2"></i>Cette année
+                </a>
+                <a href="@Url.Action("Index", "Audit", new { period = "all" })" 
+                   class="btn btn-outline-primary @(ViewBag.SelectedPeriod == "all" || ViewBag.SelectedPeriod == null ? "active" : "")">
+                    <i class="fas fa-history me-2"></i>Tout
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tableau Historique -->
+    @if (Model.Any())
+    {
+        <div class="card shadow-sm">
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-striped table-hover datatable" id="auditTable">
+                        <thead class="table-dark">
+                            <tr>
+                                <th>Date/Heure</th>
+                                <th>Utilisateur</th>
+                                <th>Action</th>
+                                <th>Type</th>
+                                <th>Entité</th>
+                                <th>Détails</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var log in Model)
+                            {
+                                var actionBadgeClass = log.ActionType switch
+                                {
+                                    GestionArticles.Models.Audit.AuditActionType.Create => "bg-success",
+                                    GestionArticles.Models.Audit.AuditActionType.Update => "bg-info",
+                                    GestionArticles.Models.Audit.AuditActionType.Delete => "bg-danger",
+                                    GestionArticles.Models.Audit.AuditActionType.Restore => "bg-warning",
+                                    GestionArticles.Models.Audit.AuditActionType.StatusChange => "bg-primary",
+                                    _ => "bg-secondary"
+                                };
+
+                                var actionIcon = log.ActionType switch
+                                {
+                                    GestionArticles.Models.Audit.AuditActionType.Create => "fa-plus",
+                                    GestionArticles.Models.Audit.AuditActionType.Update => "fa-edit",
+                                    GestionArticles.Models.Audit.AuditActionType.Delete => "fa-trash",
+                                    GestionArticles.Models.Audit.AuditActionType.Restore => "fa-undo",
+                                    GestionArticles.Models.Audit.AuditActionType.StatusChange => "fa-exchange-alt",
+                                    _ => "fa-info"
+                                };
+
+                                <tr>
+                                    <td>
+                                        <small>@log.Timestamp.ToString("dd/MM/yyyy HH:mm:ss")</small>
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-secondary">@log.UserEmail</span>
+                                    </td>
+                                    <td>
+                                        <span class="badge @actionBadgeClass">
+                                            <i class="fas @actionIcon me-1"></i>@log.ActionType
+                                        </span>
+                                    </td>
+                                    <td>@log.EntityType</td>
+                                    <td>
+                                        <strong>@log.EntityName</strong> <small>(ID: @log.EntityId)</small>
+                                    </td>
+                                    <td>
+                                        @if (!string.IsNullOrEmpty(log.OldValues) || !string.IsNullOrEmpty(log.NewValues))
+                                        {
+                                            <a class="btn btn-sm btn-primary" href="@Url.Action("Details", "Audit", new { id = log.Id })">
+                                                <i class="fas fa-expand"></i> Voir
+                                            </a>
+                                        }
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    }
+    else
+    {
+        <div class="alert alert-info text-center">
+            <i class="fas fa-inbox fs-1 mb-3 d-block"></i>
+            <p>Aucun historique pour cette période</p>
+        </div>
+    }
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        fetch('/api/notifications/list?count=100')
+            .then(response => {
+                if (!response.ok) throw new Error('HTTP ' + response.status);
+                return response.json();
+            })
+            .then(notifications => {
+                allNotifications = Array.isArray(notifications) ? notifications : [];
+                document.getElementById('countAll').textContent = allNotifications.length;
+                document.getElementById('countUnread').textContent = allNotifications.filter(n => !n.isRead).length;
+                displayNotifications(allNotifications);
+            })
+            .catch(err => {
+                console.error('Erreur lors du chargement des notifications:', err);
+                displayNotifications([]);
+            });
+    });
+</script>

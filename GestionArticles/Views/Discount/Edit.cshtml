@@ -1,0 +1,127 @@
+@model GestionArticles.Models.Promotions.Discount
+
+@{
+    ViewData["Title"] = "Modifier une Promotion";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container-fluid mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <h1 class="mb-4">?? Modifier la Promotion</h1>
+
+            <form method="post" asp-action="Edit" class="card shadow-sm">
+                <input type="hidden" asp-for="Id" />
+                <div class="card-body">
+
+                    <!-- Nom de la Promotion -->
+                    <div class="mb-3">
+                        <label asp-for="Name" class="form-label fw-bold">??? Nom de la promotion *</label>
+                        <input asp-for="Name" class="form-control" required>
+                        <span asp-validation-for="Name" class="text-danger"></span>
+                    </div>
+
+                    <!-- Type de Promotion -->
+                    <div class="mb-3">
+                        <label asp-for="Type" class="form-label fw-bold">?? Type de promotion *</label>
+                        <select asp-for="Type" class="form-select" id="discountType" required onchange="updateValueLabel()">
+                            <option value="1">Pourcentage de réduction (%)</option>
+                            <option value="2">Livraison gratuite</option>
+                        </select>
+                        <span asp-validation-for="Type" class="text-danger"></span>
+                    </div>
+
+                    <!-- Valeur (affichage dynamique selon type) -->
+                    <div class="mb-3" id="valueSection">
+                        <label asp-for="Value" class="form-label fw-bold" id="valueLabel">?? Valeur *</label>
+                        <input asp-for="Value" type="number" step="0.01" class="form-control" required>
+                        <span asp-validation-for="Value" class="text-danger"></span>
+                        <small class="text-muted" id="valueHint">Pourcentage de réduction (1-100%)</small>
+                    </div>
+
+                    <!-- Dates -->
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="StartDate" class="form-label fw-bold">?? Date début *</label>
+                            <input asp-for="StartDate" type="datetime-local" class="form-control" required>
+                            <span asp-validation-for="StartDate" class="text-danger"></span>
+                        </div>
+
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="EndDate" class="form-label fw-bold">?? Date fin *</label>
+                            <input asp-for="EndDate" type="datetime-local" class="form-control" required>
+                            <span asp-validation-for="EndDate" class="text-danger"></span>
+                        </div>
+                    </div>
+
+                    <!-- Ciblage: Produit Spécifique -->
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">?? Produit spécifique (optionnel)</label>
+                        <select asp-for="TargetProductId" class="form-select" asp-items="ViewBag.Products">
+                            <option value="">-- Appliquer à tous les produits --</option>
+                        </select>
+                    </div>
+
+                    <!-- Ciblage: Catégorie Spécifique -->
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">??? Catégorie spécifique (optionnel)</label>
+                        <select asp-for="TargetCategoryId" class="form-select" asp-items="ViewBag.Categories">
+                            <option value="">-- Appliquer à toutes les catégories --</option>
+                        </select>
+                    </div>
+
+                    <!-- Statut -->
+                    <div class="form-check mb-4">
+                        <input asp-for="IsActive" type="checkbox" class="form-check-input" id="isActive">
+                        <label class="form-check-label" for="isActive">
+                            ? Activer cette promotion
+                        </label>
+                    </div>
+
+                    <!-- Boutons -->
+                    <div class="d-flex gap-2">
+                        <button type="submit" class="btn btn-primary btn-lg">
+                            <i class="fas fa-save me-2"></i>Enregistrer les modifications
+                        </button>
+                        <a href="@Url.Action("Index", "Discount")" class="btn btn-secondary btn-lg">
+                            <i class="fas fa-arrow-left me-2"></i>Annuler
+                        </a>
+                    </div>
+                </div>
+            </form>
+
+            <!-- Info Panel -->
+            <div class="alert alert-info mt-4">
+                <h5>?? Types de promotions</h5>
+                <ul class="mb-0">
+                    <li><strong>Réduction %:</strong> Applique un pourcentage de réduction</li>
+                    <li><strong>Livraison gratuite:</strong> Élimine les frais de 10,000 DT</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function updateValueLabel() {
+    const typeSelect = document.getElementById('discountType');
+    const valueLabel = document.getElementById('valueLabel');
+    const valueHint = document.getElementById('valueHint');
+    const valueInput = document.querySelector('[name="Value"]');
+    
+    const type = typeSelect.value;
+    
+    if (type === '1') {
+        valueLabel.textContent = '?? Pourcentage de réduction *';
+        valueHint.textContent = 'Pourcentage (1-100%)';
+        valueInput.disabled = false;
+    } else if (type === '2') {
+        valueLabel.textContent = '? Livraison gratuite';
+        valueHint.textContent = 'Non utilisé (livraison automatiquement gratuite)';
+        valueInput.value = '0';
+        valueInput.disabled = true;
+    }
+}
+
+document.addEventListener('DOMContentLoaded', updateValueLabel);
+</script>

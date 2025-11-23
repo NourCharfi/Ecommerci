@@ -1,0 +1,32 @@
+﻿@model GestionArticles.Models.Category
+
+@{
+    ViewData["Title"] = "Supprimer catégorie";
+}
+
+<h1>Supprimer la catégorie</h1>
+
+<div class="row">
+    <div class="col-md-4">
+        @if (!string.IsNullOrEmpty(Model.Image))
+        {
+            <img src="~/images/categories/@Model.Image" class="img-fluid rounded mb-3" alt="Image catégorie" />
+        }
+        else
+        {
+            <img src="~/images/noimage.jpg" class="img-fluid rounded mb-3" alt="Pas d'image" />
+        }
+    </div>
+    <div class="col-md-8">
+        <h4>@Model.CategoryName</h4>
+        <p class="text-danger">Êtes-vous sûr de vouloir supprimer cette catégorie ? Cette action peut affecter les produits associés.</p>
+
+        <!-- Utiliser l'action Delete (ActionName attribute) -->
+        <form asp-action="Delete" asp-route-id="@Model.CategoryId" method="post">
+            @Html.AntiForgeryToken()
+            <input type="hidden" asp-for="CategoryId" />
+            <button type="submit" class="btn btn-danger">Supprimer</button>
+            <a asp-action="Index" class="btn btn-secondary ms-2">Annuler</a>
+        </form>
+    </div>
+</div>

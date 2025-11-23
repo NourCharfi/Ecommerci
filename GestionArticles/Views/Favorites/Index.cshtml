@@ -1,0 +1,34 @@
+@model IEnumerable<GestionArticles.Models.Product>
+@{
+    ViewData["Title"] = "Mes Favoris";
+}
+<h2>Mes Favoris</h2>
+@if (Model == null || !Model.Any())
+{
+    <p>Vous n'avez pas encore de favoris.</p>
+}
+else
+{
+    <div class="row">
+        @foreach (var p in Model)
+        {
+            <div class="col-md-4 mb-3">
+                <div class="card">
+                    <img class="card-img-top" src="~/images/@(p.Image ?? "noimage.jpg")" />
+                    <div class="card-body">
+                        <h5>@p.Name</h5>
+                        <p>@p.Price.ToString("C0")</p>
+                        <a asp-controller="Product" asp-action="Details" asp-route-id="@p.ProductId" class="btn btn-primary">Voir</a>
+                        <button class="btn btn-outline-danger FavoriteToggle" data-id="@p.ProductId">Retirer</button>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+}
+
+<!-- Scripts are loaded globally in _Layout, remove per-view include to avoid duplicate bindings -->
+
+@section Scripts {
+    @* script removed; Monscript.js is already referenced in _Layout *@
+}

@@ -1,0 +1,54 @@
+﻿@using GestionArticles.ViewModels.Auth
+@model LoginViewModel
+@{
+    ViewBag.Title = "Connexion";
+    var returnUrl = Context.Request.Query["ReturnUrl"]; }
+<div class="auth-wrapper d-flex align-items-center justify-content-center">
+    <div class="auth-card glass-card shadow-lg">
+        <div class="auth-header text-center">
+            <div class="auth-logo mb-3"><i class="fas fa-shopping-bag"></i></div>
+            <h1 class="h3 fw-bold mb-1">Connexion à ECommerci.tn</h1>
+            <p class="text-light small mb-0">Accédez à votre compte sécurisé</p>
+        </div>
+        <div class="auth-body">
+            @if (!ViewData.ModelState.IsValid) { <div asp-validation-summary="All" class="alert alert-danger alert-dismissible fade show" role="alert"><i class="fas fa-exclamation-circle me-2"></i><button type="button" class="btn-close" data-bs-dismiss="alert"></button></div> }
+            <form asp-route-returnurl="@returnUrl" method="post" novalidate>
+                <div class="form-floating mb-3 auth-floating">
+                    <input asp-for="Email" class="form-control" placeholder="email-ou-identifiant" />
+                    <label asp-for="Email"><i class="fas fa-user me-2 text-primary"></i>Email ou nom d'utilisateur</label>
+                    <span asp-validation-for="Email" class="text-danger small"></span>
+                </div>
+                <div class="form-floating mb-3 position-relative auth-floating">
+                    <input asp-for="Password" type="password" class="form-control" placeholder="motdepasse" id="pwdInput" />
+                    <label asp-for="Password"><i class="fas fa-lock me-2 text-primary"></i>Mot de passe</label>
+                    <button type="button" class="btn btn-sm btn-outline-secondary toggle-pwd" tabindex="-1" onclick="togglePwd()"><i class="fas fa-eye"></i></button>
+                    <span asp-validation-for="Password" class="text-danger small"></span>
+                </div>
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <div class="form-check"><input asp-for="RememberMe" class="form-check-input" type="checkbox" id="rememberMe" /><label asp-for="RememberMe" class="form-check-label" for="rememberMe">Se souvenir</label></div>
+                    <a href="#" class="small text-decoration-none">Mot de passe oublié?</a>
+                </div>
+                <button type="submit" class="btn btn-primary w-100 btn-auth-submit mb-2"><i class="fas fa-sign-in-alt me-2"></i>Se connecter</button>
+            </form>
+        </div>
+        <div class="auth-footer text-center small">
+            Pas encore de compte ? <a asp-action="Register" class="text-primary fw-semibold text-decoration-none">S'inscrire</a>
+        </div>
+    </div>
+</div>
+<style>
+    .auth-wrapper{min-height:calc(100vh - 70px);background:linear-gradient(115deg,#2D3561 0%,#3D4575 45%,#1D2541 100%);padding:2rem}
+    .glass-card{background:rgba(255,255,255,0.08);backdrop-filter:blur(14px);border:1px solid rgba(255,255,255,0.15);border-radius:20px;color:#fff;max-width:420px;width:100%}
+    .auth-header{padding:2rem 1.5rem 1rem}
+    .auth-logo{font-size:54px;color:#FF6B6B;filter:drop-shadow(0 4px 8px rgba(0,0,0,.35))}
+    .auth-body{padding:1rem 1.75rem 1.5rem}
+    .auth-footer{padding:.85rem 1.5rem;background:rgba(255,255,255,0.05);border-top:1px solid rgba(255,255,255,0.1);border-radius:0 0 20px 20px}
+    .form-control{background:rgba(255,255,255,0.15);border:1px solid rgba(255,255,255,0.25);color:#fff}
+    .form-control:focus{background:rgba(255,255,255,0.25);color:#fff;border-color:#4ECDC4;box-shadow:0 0 0 3px rgba(78,205,196,0.3)}
+    .auth-floating label{color:#fff !important;font-weight:500}
+    .toggle-pwd{position:absolute;top:50%;right:10px;transform:translateY(-50%);border-radius:50%;padding:.4rem .6rem}
+    .btn-auth-submit{padding:.9rem 1.25rem;font-weight:600;font-size:1rem}
+    .btn-auth-submit:hover{transform:translateY(-2px);box-shadow:0 8px 20px rgba(0,0,0,.3)}
+    @@media (max-width:576px){.auth-wrapper{padding:1rem}.glass-card{border-radius:16px}}
+</style>
+@section Scripts {<script>function togglePwd(){const i=document.getElementById('pwdInput');const b=document.querySelector('.toggle-pwd i');if(i.type==='password'){i.type='text';b.classList.remove('fa-eye');b.classList.add('fa-eye-slash');}else{i.type='password';b.classList.add('fa-eye');b.classList.remove('fa-eye-slash');}}</script> @await Html.PartialAsync("_ValidationScriptsPartial") }

@@ -1,0 +1,60 @@
+@model GestionArticles.Models.Orders.Order
+
+@{
+    ViewData["Title"] = "Paiement réussi - ECommerci.tn";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container-fluid py-4">
+    <div class="row">
+        <div class="col-md-6 offset-md-3">
+            <div class="card shadow-sm border-success">
+                <div class="card-body text-center">
+                    <div class="mb-4">
+                        <i class="fas fa-check-circle text-success" style="font-size: 60px;"></i>
+                    </div>
+                    <h2 class="text-success mb-3">Paiement réussi</h2>
+
+                    @if (Model != null)
+                    {
+                        <div class="alert alert-info">
+                            <dl class="row mb-0">
+                                <dt class="col-sm-5">Commande:</dt>
+                                <dd class="col-sm-7"><strong>#@Model.Id</strong></dd>
+
+                                <dt class="col-sm-5">Montant total:</dt>
+                                <dd class="col-sm-7"><strong>@Model.TotalAmount.ToString("F2") DT</strong></dd>
+
+                                <dt class="col-sm-5">Frais livraison:</dt>
+                                <dd class="col-sm-7"><strong>@Model.DeliveryFee.ToString("F2") DT</strong></dd>
+
+                                <dt class="col-sm-5">Statut:</dt>
+                                <dd class="col-sm-7">
+                                    @if (Model.Status == GestionArticles.Models.Orders.OrderStatus.Paid)
+                                    { <span class="badge bg-primary"><i class="fas fa-credit-card me-1"></i>Payée</span> }
+                                    else if (Model.Status == GestionArticles.Models.Orders.OrderStatus.Confirmed)
+                                    { <span class="badge bg-success"><i class="fas fa-check me-1"></i>Confirmée</span> }
+                                    else { <span class="badge bg-secondary">@Model.Status</span> }
+                                </dd>
+
+                                <dt class="col-sm-5">Email:</dt>
+                                <dd class="col-sm-7">@Model.Email</dd>
+                            </dl>
+                        </div>
+                    }
+
+                    <p class="text-muted mb-4">Votre paiement est enregistré. Votre commande va passer en préparation puis confirmation interne.</p>
+
+                    <div class="d-grid gap-2">
+                        <a href="@Url.Action("MyOrders", "Orders")" class="btn btn-primary">
+                            <i class="fas fa-list me-2"></i>Mes commandes
+                        </a>
+                        <a href="@Url.Action("Index", "Home")" class="btn btn-secondary">
+                            <i class="fas fa-home me-2"></i>Accueil
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

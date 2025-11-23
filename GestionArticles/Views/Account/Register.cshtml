@@ -1,0 +1,51 @@
+﻿@using GestionArticles.ViewModels.Auth
+@model RegisterViewModel
+@{ ViewBag.Title = "Inscription"; }
+<div class="auth-wrapper d-flex align-items-center justify-content-center">
+    <div class="auth-card glass-card shadow-lg">
+        <div class="auth-header text-center">
+            <div class="auth-logo mb-2"><i class="fas fa-user-plus"></i></div>
+            <h1 class="h3 fw-bold mb-1">Créer un compte ECommerci.tn</h1>
+            <p class="text-light small mb-0">Rejoignez notre boutique et profitez des offres</p>
+        </div>
+        <div class="progress small rounded-0" style="height:6px"><div class="progress-bar bg-accent" id="progressBar" style="width:33%"></div></div>
+        <div class="auth-body">
+            @if (!ViewData.ModelState.IsValid) { <div asp-validation-summary="All" class="alert alert-danger alert-dismissible fade show" role="alert"><i class="fas fa-exclamation-circle me-2"></i><button type="button" class="btn-close" data-bs-dismiss="alert"></button></div> }
+            <form method="post" asp-action="Register" novalidate id="regForm">
+                <div class="form-floating"><input asp-for="UserName" class="form-control" placeholder="Nom d'utilisateur" /><label asp-for="UserName"><i class="fas fa-user me-2 text-primary"></i>Nom d'utilisateur *</label><span asp-validation-for="UserName" class="text-danger small"></span></div>
+                <div class="form-floating mt-3"><input asp-for="Email" type="email" class="form-control" placeholder="Email" /><label asp-for="Email"><i class="fas fa-envelope me-2 text-primary"></i>Email *</label><span asp-validation-for="Email" class="text-danger small"></span></div>
+                <div class="form-floating mt-3"><input asp-for="Phone" type="tel" class="form-control" placeholder="Téléphone" /><label asp-for="Phone"><i class="fas fa-phone me-2 text-primary"></i>Téléphone *</label><span asp-validation-for="Phone" class="text-danger small"></span></div>
+                <div class="form-floating mt-3"><input asp-for="Address" class="form-control" placeholder="Adresse" /><label asp-for="Address"><i class="fas fa-map-marker-alt me-2 text-primary"></i>Adresse *</label><span asp-validation-for="Address" class="text-danger small"></span></div>
+                <div class="row g-3 mt-1">
+                    <div class="col-md-6"><div class="form-floating"><input asp-for="Password" type="password" class="form-control" placeholder="Mot de passe" id="pwdReg" /><label asp-for="Password"><i class="fas fa-lock me-2 text-primary"></i>Mot de passe *</label><span asp-validation-for="Password" class="text-danger small"></span></div><div class="password-meter mt-1" id="pwdMeter"><div class="meter-bar"></div></div><small class="text-muted d-block mt-1"><i class="fas fa-info-circle me-1"></i>Min 6 caractères, 1 chiffre & 1 minuscule</small></div>
+                    <div class="col-md-6"><div class="form-floating position-relative"><input asp-for="ConfirmPassword" type="password" class="form-control" placeholder="Confirmer" id="pwdConfirm" /><label asp-for="ConfirmPassword"><i class="fas fa-lock me-2 text-primary"></i>Confirmer *</label><span asp-validation-for="ConfirmPassword" class="text-danger small"></span><button type="button" class="btn btn-sm btn-outline-secondary toggle-pwd" tabindex="-1" onclick="togglePwdReg()"><i class="fas fa-eye"></i></button></div></div>
+                </div>
+                <div class="form-check mt-3 p-2 rounded terms-box"><input class="form-check-input" type="checkbox" id="terms" required><label class="form-check-label" for="terms">J'accepte les <strong>conditions</strong> & la <strong>confidentialité</strong></label></div>
+                <button type="submit" class="btn btn-primary w-100 btn-auth-submit mt-4 mb-2"><i class="fas fa-user-plus me-2"></i>Créer mon compte</button>
+            </form>
+        </div>
+        <div class="auth-footer text-center small">Déjà un compte ? <a asp-action="Login" class="text-primary fw-semibold text-decoration-none">Se connecter</a></div>
+    </div>
+</div>
+<style>
+.auth-wrapper{min-height:calc(100vh - 70px);background:linear-gradient(115deg,#2D3561 0%,#3D4575 45%,#1D2541 100%);padding:2rem}
+.glass-card{background:rgba(255,255,255,0.08);backdrop-filter:blur(14px);border:1px solid rgba(255,255,255,0.15);border-radius:20px;color:#fff;max-width:760px;width:100%}
+.auth-header{padding:1.9rem 1.5rem 1.2rem}
+.auth-logo{font-size:50px;color:#4ECDC4;filter:drop-shadow(0 4px 8px rgba(0,0,0,.35))}
+.auth-body{padding:1.25rem 1.75rem 1.75rem}
+.auth-footer{padding:.85rem 1.5rem;background:rgba(255,255,255,0.05);border-top:1px solid rgba(255,255,255,0.1);border-radius:0 0 20px 20px}
+.form-control{background:rgba(255,255,255,0.15);border:1px solid rgba(255,255,255,0.25);color:#fff}
+.form-control:focus{background:rgba(255,255,255,0.25);color:#fff;border-color:#4ECDC4;box-shadow:0 0 0 3px rgba(78,205,196,0.3)}
+.form-floating>label{color:#fff;font-weight:500}
+.toggle-pwd{position:absolute;top:50%;right:10px;transform:translateY(-50%);border-radius:50%;padding:.4rem .6rem}
+.btn-auth-submit{padding:.85rem 1.25rem;font-weight:600;font-size:1rem}
+.btn-auth-submit:hover{transform:translateY(-2px);box-shadow:0 8px 20px rgba(0,0,0,.3)}
+.password-meter{height:6px;background:rgba(255,255,255,0.2);border-radius:4px;overflow:hidden}
+.password-meter .meter-bar{height:100%;width:0;background:#FF6B6B;transition:width .4s,background .4s}
+.bg-accent{background:#4ECDC4!important}
+.terms-box{background:transparent !important;border:1px solid rgba(255,255,255,.15);color:#fff;}
+.terms-box .form-check-input{background:rgba(255,255,255,0.25);border:none}
+.terms-box .form-check-input:checked{background:#4ECDC4}
+@@media (max-width:576px){.auth-wrapper{padding:1rem}.glass-card{border-radius:16px}}
+</style>
+@section Scripts {<script>function togglePwdReg(){const p=document.getElementById('pwdConfirm');const b=document.querySelector('#pwdConfirm').parentElement.querySelector('.toggle-pwd i');if(p.type==='password'){p.type='text';b.classList.replace('fa-eye','fa-eye-slash');}else{p.type='password';b.classList.replace('fa-eye-slash','fa-eye');}};const pwd=document.getElementById('pwdReg');const meter=document.querySelector('#pwdMeter .meter-bar');pwd.addEventListener('input',()=>{const v=pwd.value;let score=0;if(v.length>=6)score++;if(/[0-9]/.test(v))score++;if(/[a-z]/.test(v))score++;if(/[A-Z]/.test(v))score++;if(/[^A-Za-z0-9]/.test(v))score++;const pct=(score/5)*100;meter.style.width=pct+'%';meter.style.background=pct<40?'#FF6B6B':pct<70?'#FFD93D':'#51CF66';document.getElementById('progressBar').style.width=Math.min(33+pct/3,100)+'%';});</script> @await Html.PartialAsync("_ValidationScriptsPartial") }

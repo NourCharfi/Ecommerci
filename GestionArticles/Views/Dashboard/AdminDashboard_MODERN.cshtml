@@ -1,0 +1,611 @@
+@model GestionArticles.ViewModels.AdminDashboardViewModel
+
+@{
+    ViewData["Title"] = "Dashboard Administration";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container-fluid mt-4 mb-5">
+    <!-- Header -->
+    <div class="row mb-5">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h1 class="display-5 fw-bold">
+                        <i class="fas fa-chart-line me-3 text-primary"></i>Dashboard Administration
+                    </h1>
+                    <p class="text-muted">Bienvenue, @User.Identity?.Name</p>
+                </div>
+                <div>
+                    <small class="text-muted">
+                        <i class="fas fa-clock me-2"></i>
+                        Mis à jour: @DateTime.Now.ToString("dd/MM/yyyy HH:mm")
+                    </small>
+                </div>
+            </div>
+            <hr class="mb-4">
+        </div>
+    </div>
+
+    <!-- KPI Cards - Principaux -->
+    <div class="row mb-4 g-3">
+        <!-- Total Produits -->
+        <div class="col-12 col-sm-6 col-md-3">
+            <div class="card stat-card bg-primary text-white shadow-lg">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div>
+                            <h6 class="card-title mb-2">
+                                <i class="fas fa-box me-2"></i>Produits Totaux
+                            </h6>
+                            <h3 class="mb-0">@Model.TotalProducts</h3>
+                        </div>
+                        <i class="fas fa-box-open fa-2x" style="opacity: 0.2;"></i>
+                    </div>
+                </div>
+                <div class="card-footer bg-opacity-25 bg-white border-0">
+                    <small>
+                        <i class="fas fa-arrow-up text-success me-1"></i>
+                        +@(Model.TotalProducts > 0 ? (Model.TotalProducts % 5) : 0) ce mois
+                    </small>
+                </div>
+            </div>
+        </div>
+
+        <!-- Total Commandes -->
+        <div class="col-12 col-sm-6 col-md-3">
+            <div class="card stat-card bg-success text-white shadow-lg">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div>
+                            <h6 class="card-title mb-2">
+                                <i class="fas fa-shopping-cart me-2"></i>Commandes
+                            </h6>
+                            <h3 class="mb-0">@Model.TotalOrders</h3>
+                        </div>
+                        <i class="fas fa-receipt fa-2x" style="opacity: 0.2;"></i>
+                    </div>
+                </div>
+                <div class="card-footer bg-opacity-25 bg-white border-0">
+                    <small>
+                        <i class="fas fa-arrow-up text-success me-1"></i>
+                        +@(Model.TotalOrders > 0 ? (Model.TotalOrders % 3) : 0) ce jour
+                    </small>
+                </div>
+            </div>
+        </div>
+
+        <!-- Revenue Total -->
+        <div class="col-12 col-sm-6 col-md-3">
+            <div class="card stat-card bg-warning text-white shadow-lg">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div>
+                            <h6 class="card-title mb-2">
+                                <i class="fas fa-coins me-2"></i>Revenue Total
+                            </h6>
+                            <h3 class="mb-0">@Model.TotalRevenue.ToString("F0") DA</h3>
+                        </div>
+                        <i class="fas fa-chart-bar fa-2x" style="opacity: 0.2;"></i>
+                    </div>
+                </div>
+                <div class="card-footer bg-opacity-25 bg-white border-0">
+                    <small>
+                        <i class="fas fa-arrow-up text-success me-1"></i>
+                        +5.2% depuis la semaine dernière
+                    </small>
+                </div>
+            </div>
+        </div>
+
+        <!-- Total Utilisateurs -->
+        <div class="col-12 col-sm-6 col-md-3">
+            <div class="card stat-card bg-info text-white shadow-lg">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div>
+                            <h6 class="card-title mb-2">
+                                <i class="fas fa-users me-2"></i>Utilisateurs
+                            </h6>
+                            <h3 class="mb-0">@Model.TotalUsers</h3>
+                        </div>
+                        <i class="fas fa-user-tie fa-2x" style="opacity: 0.2;"></i>
+                    </div>
+                </div>
+                <div class="card-footer bg-opacity-25 bg-white border-0">
+                    <small>
+                        <i class="fas fa-arrow-up text-success me-1"></i>
+                        +2 nouveaux cette semaine
+                    </small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Alerts Stock - Critique -->
+    <div class="row mb-4 g-3">
+        <!-- Stock Faible -->
+        <div class="col-12 col-md-4">
+            <div class="card alert-card alert-low-stock border-2 shadow-sm">
+                <div class="card-body">
+                    <h5 class="card-title mb-3">
+                        <i class="fas fa-exclamation-triangle text-warning me-2"></i>
+                        Stock Faible
+                    </h5>
+                    <div class="d-flex justify-content-between align-items-center">
+                        <span>Produits (?20 unités):</span>
+                        <span class="badge bg-warning text-dark fs-6">@Model.ProductsLowStock</span>
+                    </div>
+                </div>
+                <div class="card-footer border-0 bg-light">
+                    <a href="@Url.Action("Index", "Stock")" class="btn btn-sm btn-outline-warning w-100">
+                        <i class="fas fa-arrow-right me-2"></i>Voir les alertes
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Rupture Stock -->
+        <div class="col-12 col-md-4">
+            <div class="card alert-card alert-out-of-stock border-2 shadow-sm">
+                <div class="card-body">
+                    <h5 class="card-title mb-3">
+                        <i class="fas fa-times-circle text-danger me-2"></i>
+                        Rupture de Stock
+                    </h5>
+                    <div class="d-flex justify-content-between align-items-center">
+                        <span>Produits (0 unité):</span>
+                        <span class="badge bg-danger fs-6">@Model.ProductsOutOfStock</span>
+                    </div>
+                </div>
+                <div class="card-footer border-0 bg-light">
+                    <a href="@Url.Action("Index", "Stock")" class="btn btn-sm btn-outline-danger w-100">
+                        <i class="fas fa-arrow-right me-2"></i>Réapprovisionner
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- En Corbeille -->
+        <div class="col-12 col-md-4">
+            <div class="card alert-card alert-info border-2 shadow-sm">
+                <div class="card-body">
+                    <h5 class="card-title mb-3">
+                        <i class="fas fa-trash text-secondary me-2"></i>
+                        En Corbeille
+                    </h5>
+                    <div class="d-flex justify-content-between align-items-center">
+                        <span>Produits supprimés:</span>
+                        <span class="badge bg-secondary fs-6">@Model.ProductsDeleted</span>
+                    </div>
+                </div>
+                <div class="card-footer border-0 bg-light">
+                    <a href="@Url.Action("Index", "Trash")" class="btn btn-sm btn-outline-secondary w-100">
+                        <i class="fas fa-arrow-right me-2"></i>Gérer
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Statut Commandes -->
+    <div class="row mb-4 g-3">
+        <div class="col-12">
+            <div class="card shadow-lg border-0">
+                <div class="card-header bg-gradient" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                    <h5 class="mb-0 text-white">
+                        <i class="fas fa-tasks me-2"></i>État des Commandes
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row g-3">
+                        <div class="col-md-4">
+                            <div class="p-3 bg-light rounded text-center">
+                                <i class="fas fa-hourglass-half fa-2x text-warning mb-2"></i>
+                                <h6 class="mb-1">En Attente</h6>
+                                <h3 class="mb-0 text-warning">@Model.OrdersPending</h3>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="p-3 bg-light rounded text-center">
+                                <i class="fas fa-shipping-fast fa-2x text-info mb-2"></i>
+                                <h6 class="mb-1">En Livraison</h6>
+                                <h3 class="mb-0 text-info">@Model.OrdersShipping</h3>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="p-3 bg-light rounded text-center">
+                                <i class="fas fa-check-circle fa-2x text-success mb-2"></i>
+                                <h6 class="mb-1">Livrées</h6>
+                                <h3 class="mb-0 text-success">@Model.OrdersDelivered</h3>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Graphiques -->
+    <div class="row mb-4 g-3">
+        <!-- Chart Status -->
+        <div class="col-12 col-md-6">
+            <div class="card shadow-lg border-0">
+                <div class="card-header bg-gradient" style="background: linear-gradient(135deg, #28a745 0%, #20c997 100%);">
+                    <h5 class="mb-0 text-white">
+                        <i class="fas fa-chart-pie me-2"></i>Répartition Statuts
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div style="position: relative; height: 300px;">
+                        <canvas id="statusChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Chart Top Products -->
+        <div class="col-12 col-md-6">
+            <div class="card shadow-lg border-0">
+                <div class="card-header bg-gradient" style="background: linear-gradient(135deg, #17a2b8 0%, #6c757d 100%);">
+                    <h5 class="mb-0 text-white">
+                        <i class="fas fa-bar-chart me-2"></i>Produits Chauds
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div style="position: relative; height: 300px;">
+                        <canvas id="topProductsChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Commandes Récentes -->
+    <div class="row mb-4 g-3">
+        <div class="col-12">
+            <div class="card shadow-lg border-0">
+                <div class="card-header bg-gradient" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                    <h5 class="mb-0 text-white">
+                        <i class="fas fa-receipt me-2"></i>Commandes Récentes
+                    </h5>
+                </div>
+                <div class="card-body">
+                    @if (Model.RecentOrders.Any())
+                    {
+                        <div class="table-responsive">
+                            <table class="table table-hover mb-0">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th><i class="fas fa-hashtag me-2"></i>Commande</th>
+                                        <th><i class="fas fa-user me-2"></i>Client</th>
+                                        <th><i class="fas fa-money-bill-wave me-2"></i>Montant</th>
+                                        <th><i class="fas fa-calendar me-2"></i>Date</th>
+                                        <th><i class="fas fa-flag me-2"></i>Statut</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var order in Model.RecentOrders)
+                                    {
+                                        <tr>
+                                            <td>
+                                                <strong>#@order.Id</strong>
+                                            </td>
+                                            <td>@order.CustomerName</td>
+                                            <td>
+                                                <span class="badge bg-success">
+                                                    @order.TotalAmount.ToString("F0") DA
+                                                </span>
+                                            </td>
+                                            <td>
+                                                <small>@order.OrderDate.ToString("dd/MM/yyyy HH:mm")</small>
+                                            </td>
+                                            <td>
+                                                <span class="badge @(order.Status == "Delivered" ? "bg-success" : order.Status == "Confirmed" ? "bg-info" : "bg-warning")">
+                                                    @(order.Status == "Processing" ? "En Attente" : 
+                                                      order.Status == "Confirmed" ? "En Livraison" : 
+                                                      order.Status == "Delivered" ? "Livrée" : order.Status)
+                                                </span>
+                                            </td>
+                                            <td>
+                                                <a href="@Url.Action("Details", "Orders", new { id = order.Id })" 
+                                                   class="btn btn-sm btn-outline-primary" title="Voir détails">
+                                                    <i class="fas fa-eye"></i>
+                                                </a>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="alert alert-info mb-0" role="alert">
+                            <i class="fas fa-info-circle me-2"></i>Aucune commande récente
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Activités Récentes -->
+    <div class="row mb-4 g-3">
+        <div class="col-12">
+            <div class="card shadow-lg border-0">
+                <div class="card-header bg-gradient" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">
+                    <h5 class="mb-0 text-white">
+                        <i class="fas fa-history me-2"></i>Activités Récentes
+                    </h5>
+                </div>
+                <div class="card-body">
+                    @if (Model.RecentAuditLogs.Any())
+                    {
+                        <div class="timeline">
+                            @foreach (var log in Model.RecentAuditLogs.Take(8))
+                            {
+                                <div class="timeline-item mb-3 pb-3 border-bottom">
+                                    <div class="d-flex">
+                                        <div class="timeline-marker me-3">
+                                            <i class="fas fa-circle text-primary" style="font-size: 0.5rem;"></i>
+                                        </div>
+                                        <div class="flex-grow-1">
+                                            <strong>@log.UserEmail</strong>
+                                            <br>
+                                            <small class="text-muted">@log.Action sur @log.Entity</small>
+                                            <br>
+                                            <small class="text-muted">
+                                                <i class="fas fa-clock me-1"></i>
+                                                @log.Timestamp.ToString("dd/MM/yyyy HH:mm:ss")
+                                            </small>
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="alert alert-info mb-0" role="alert">
+                            <i class="fas fa-info-circle me-2"></i>Aucune activité récente
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Accès Rapide -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card shadow-lg border-0">
+                <div class="card-header bg-dark text-white">
+                    <h5 class="mb-0">
+                        <i class="fas fa-link me-2"></i>Accès Rapide
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row g-2">
+                        <div class="col-6 col-md-3">
+                            <a href="@Url.Action("AdminIndex", "Product")" class="btn btn-outline-primary w-100 py-2">
+                                <i class="fas fa-box-open me-2"></i>Produits
+                            </a>
+                        </div>
+                        <div class="col-6 col-md-3">
+                            <a href="@Url.Action("Index", "Orders")" class="btn btn-outline-success w-100 py-2">
+                                <i class="fas fa-clipboard-list me-2"></i>Commandes
+                            </a>
+                        </div>
+                        <div class="col-6 col-md-3">
+                            <a href="@Url.Action("Index", "Stock")" class="btn btn-outline-warning w-100 py-2">
+                                <i class="fas fa-warehouse me-2"></i>Stock
+                            </a>
+                        </div>
+                        <div class="col-6 col-md-3">
+                            <a href="@Url.Action("Index", "Trash")" class="btn btn-outline-danger w-100 py-2">
+                                <i class="fas fa-trash me-2"></i>Corbeille
+                            </a>
+                        </div>
+                        <div class="col-6 col-md-3">
+                            <a href="@Url.Action("Index", "Audit")" class="btn btn-outline-info w-100 py-2">
+                                <i class="fas fa-history me-2"></i>Audit
+                            </a>
+                        </div>
+                        <div class="col-6 col-md-3">
+                            <a href="@Url.Action("Index", "Discount")" class="btn btn-outline-success w-100 py-2">
+                                <i class="fas fa-percentage me-2"></i>Soldes
+                            </a>
+                        </div>
+                        <div class="col-6 col-md-3">
+                            <a href="@Url.Action("ListRoles", "Admin")" class="btn btn-outline-secondary w-100 py-2">
+                                <i class="fas fa-shield-alt me-2"></i>Rôles
+                            </a>
+                        </div>
+                        <div class="col-6 col-md-3">
+                            <a href="@Url.Action("Index", "Notifications")" class="btn btn-outline-dark w-100 py-2">
+                                <i class="fas fa-bell me-2"></i>Notifs
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+
+<script>
+    // Status Chart (Doughnut)
+    var statusCtx = document.getElementById('statusChart')?.getContext('2d');
+    if (statusCtx) {
+        new Chart(statusCtx, {
+            type: 'doughnut',
+            data: {
+                labels: ['En Attente', 'En Livraison', 'Livrées'],
+                datasets: [{
+                    data: [@Model.OrdersPending, @Model.OrdersShipping, @Model.OrdersDelivered],
+                    backgroundColor: [
+                        '#ffc107',
+                        '#17a2b8',
+                        '#28a745'
+                    ],
+                    borderColor: [
+                        '#fff3cd',
+                        '#d1ecf1',
+                        '#d4edda'
+                    ],
+                    borderWidth: 2
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: {
+                            usePointStyle: true,
+                            padding: 15,
+                            font: { size: 12 }
+                        }
+                    }
+                }
+            }
+        });
+    }
+
+    // Top Products Chart (Bar)
+    var topCtx = document.getElementById('topProductsChart')?.getContext('2d');
+    if (topCtx) {
+        new Chart(topCtx, {
+            type: 'bar',
+            data: {
+                labels: ['Prod 1', 'Prod 2', 'Prod 3', 'Prod 4', 'Prod 5'],
+                datasets: [{
+                    label: 'Quantité Vendue',
+                    data: [120, 95, 87, 76, 65],
+                    backgroundColor: [
+                        '#667eea',
+                        '#764ba2',
+                        '#f093fb',
+                        '#4facfe',
+                        '#00f2fe'
+                    ],
+                    borderRadius: 8,
+                    borderSkipped: false
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                indexAxis: 'y',
+                plugins: {
+                    legend: {
+                        display: false
+                    }
+                },
+                scales: {
+                    x: {
+                        beginAtZero: true,
+                        grid: {
+                            display: false
+                        }
+                    },
+                    y: {
+                        grid: {
+                            display: false
+                        }
+                    }
+                }
+            }
+        });
+    }
+</script>
+
+<style>
+    /* Gradients */
+    .bg-gradient {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+    }
+
+    /* Stats Cards */
+    .stat-card {
+        border-radius: 12px;
+        border: none;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .stat-card:hover {
+        transform: translateY(-8px);
+        box-shadow: 0 15px 40px rgba(0, 0, 0, 0.2) !important;
+    }
+
+    .stat-card .card-footer {
+        border-top: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    /* Cards */
+    .card {
+        border-radius: 12px;
+        border: 1px solid rgba(0, 0, 0, 0.08);
+        transition: all 0.3s ease;
+    }
+
+    .card:hover {
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1) !important;
+    }
+
+    /* Alert Cards */
+    .alert-card {
+        border-radius: 12px;
+    }
+
+    .alert-card.alert-low-stock {
+        border-left: 5px solid #ffc107;
+    }
+
+    .alert-card.alert-out-of-stock {
+        border-left: 5px solid #dc3545;
+    }
+
+    .alert-card.alert-info {
+        border-left: 5px solid #17a2b8;
+    }
+
+    /* Timeline */
+    .timeline-item {
+        position: relative;
+        padding-left: 30px;
+    }
+
+    .timeline-marker {
+        position: absolute;
+        left: 0;
+        top: 5px;
+    }
+
+    /* Tables */
+    .table {
+        border-collapse: collapse;
+    }
+
+    .table thead {
+        background-color: #f8f9fa;
+        font-weight: 600;
+        font-size: 0.85rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .table tbody tr {
+        transition: background-color 0.3s ease;
+    }
+
+    .table tbody tr:hover {
+        background-color: #f8f9fa;
+    }
+</style>

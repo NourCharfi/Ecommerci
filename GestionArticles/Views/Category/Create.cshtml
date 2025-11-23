@@ -1,0 +1,55 @@
+﻿@model GestionArticles.Models.Category
+
+@{
+    ViewData["Title"] = "Créer une catégorie";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1 class="h3 mb-0 text-gray-800">
+        <i class="fas fa-plus me-2"></i>Créer une catégorie
+    </h1>
+    <div>
+        <a asp-action="Index" class="btn btn-secondary">
+            <i class="fas fa-arrow-left me-2"></i>Retour à la liste
+        </a>
+    </div>
+</div>
+
+<div class="card shadow mb-4">
+    <div class="card-header py-3">
+        <h6 class="m-0 font-weight-bold text-primary">
+            <i class="fas fa-folder me-2"></i>Informations de la catégorie
+        </h6>
+    </div>
+    <div class="card-body">
+        <form asp-action="Create" enctype="multipart/form-data">
+            <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
+            
+            <div class="form-group mb-4">
+                <label asp-for="CategoryName" class="form-label">
+                    <i class="fas fa-tag me-1"></i>Nom de la catégorie
+                </label>
+                <input asp-for="CategoryName" class="form-control" placeholder="Entrez le nom de la catégorie" />
+                <span asp-validation-for="CategoryName" class="text-danger"></span>
+            </div>
+
+            <div class="form-group mb-4">
+                <label class="form-label">Image de la catégorie (optionnel)</label>
+                <input type="file" name="imageFile" class="form-control" accept="image/*" />
+            </div>
+            
+            <div class="d-flex justify-content-between">
+                <a asp-action="Index" class="btn btn-secondary">
+                    <i class="fas fa-times me-2"></i>Annuler
+                </a>
+                <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-save me-2"></i>Créer la catégorie
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

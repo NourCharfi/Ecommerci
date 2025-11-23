@@ -1,0 +1,184 @@
+@model Microsoft.AspNetCore.Identity.IdentityUser
+
+@{
+    ViewData["Title"] = "User Details";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    var userRoles = (List<string>)ViewBag.Roles ?? new List<string>();
+}
+
+<div class="container-fluid py-4">
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <h2><i class="fas fa-user-circle me-2"></i>User Details</h2>
+        </div>
+        <div class="col-md-4 text-end">
+            <a href="@Url.Action("Index", "UserManagement")" class="btn btn-outline-secondary me-2">
+                <i class="fas fa-arrow-left me-2"></i>Back to Users
+            </a>
+            <a href="@Url.Action("Edit", "UserManagement", new { id = Model.Id })" class="btn btn-primary">
+                <i class="fas fa-edit me-2"></i>Edit
+            </a>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card shadow-sm">
+                <div class="card-header bg-primary text-white">
+                    <strong>User Information</strong>
+                </div>
+                <div class="card-body">
+                    <dl class="row">
+                        <dt class="col-sm-4">User ID:</dt>
+                        <dd class="col-sm-8">
+                            <code>@Model.Id</code>
+                        </dd>
+
+                        <dt class="col-sm-4">Username:</dt>
+                        <dd class="col-sm-8">
+                            <strong>@Model.UserName</strong>
+                        </dd>
+
+                        <dt class="col-sm-4">Email:</dt>
+                        <dd class="col-sm-8">
+                            <a href="mailto:@Model.Email">@Model.Email</a>
+                        </dd>
+
+                        <dt class="col-sm-4">Email Confirmed:</dt>
+                        <dd class="col-sm-8">
+                            @if (Model.EmailConfirmed)
+                            {
+                                <span class="badge bg-success">
+                                    <i class="fas fa-check me-1"></i>Confirmed
+                                </span>
+                            }
+                            else
+                            {
+                                <span class="badge bg-warning">
+                                    <i class="fas fa-clock me-1"></i>Pending
+                                </span>
+                            }
+                        </dd>
+
+                        <dt class="col-sm-4">Phone:</dt>
+                        <dd class="col-sm-8">
+                            @if (!string.IsNullOrEmpty(Model.PhoneNumber))
+                            {
+                                <a href="tel:@Model.PhoneNumber">@Model.PhoneNumber</a>
+                            }
+                            else
+                            {
+                                <span class="text-muted">Not provided</span>
+                            }
+                        </dd>
+
+                        <dt class="col-sm-4">Phone Confirmed:</dt>
+                        <dd class="col-sm-8">
+                            @if (Model.PhoneNumberConfirmed)
+                            {
+                                <span class="badge bg-success">
+                                    <i class="fas fa-check me-1"></i>Confirmed
+                                </span>
+                            }
+                            else
+                            {
+                                <span class="badge bg-warning">
+                                    <i class="fas fa-clock me-1"></i>Pending
+                                </span>
+                            }
+                        </dd>
+
+                        <dt class="col-sm-4">Two Factor:</dt>
+                        <dd class="col-sm-8">
+                            @if (Model.TwoFactorEnabled)
+                            {
+                                <span class="badge bg-success">
+                                    <i class="fas fa-shield-alt me-1"></i>Enabled
+                                </span>
+                            }
+                            else
+                            {
+                                <span class="badge bg-secondary">
+                                    <i class="fas fa-times me-1"></i>Disabled
+                                </span>
+                            }
+                        </dd>
+
+                        <dt class="col-sm-4">Account Locked:</dt>
+                        <dd class="col-sm-8">
+                            @if (Model.LockoutEnd.HasValue && Model.LockoutEnd > DateTimeOffset.UtcNow)
+                            {
+                                <span class="badge bg-danger">
+                                    <i class="fas fa-lock me-1"></i>Locked until @Model.LockoutEnd?.ToString("g")
+                                </span>
+                            }
+                            else
+                            {
+                                <span class="badge bg-success">
+                                    <i class="fas fa-unlock me-1"></i>Active
+                                </span>
+                            }
+                        </dd>
+
+                        <dt class="col-sm-4">Failed Logins:</dt>
+                        <dd class="col-sm-8">
+                            @Model.AccessFailedCount
+                        </dd>
+                    </dl>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <!-- User Roles -->
+            <div class="card shadow-sm mb-3">
+                <div class="card-header bg-info text-white">
+                    <strong>Assigned Roles</strong>
+                </div>
+                <div class="card-body">
+                    @if (userRoles != null && userRoles.Count > 0)
+                    {
+                        <div class="list-group">
+                            @foreach (var role in userRoles)
+                            {
+                                <div class="list-group-item list-group-item-success d-flex justify-content-between align-items-center">
+                                    <span>
+                                        <i class="fas fa-user-tag me-2"></i>@role
+                                    </span>
+                                    <span class="badge bg-primary">Active</span>
+                                </div>
+                            }
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="alert alert-info mb-0">
+                            <i class="fas fa-info-circle me-2"></i>
+                            No roles assigned
+                        </div>
+                    }
+                </div>
+            </div>
+
+            <!-- Quick Actions -->
+            <div class="card shadow-sm">
+                <div class="card-header bg-secondary text-white">
+                    <strong>Quick Actions</strong>
+                </div>
+                <div class="card-body">
+                    <div class="d-grid gap-2">
+                        <a href="@Url.Action("Edit", "UserManagement", new { id = Model.Id })" class="btn btn-primary btn-sm">
+                            <i class="fas fa-edit me-2"></i>Edit User
+                        </a>
+                        <a href="@Url.Action("ResetPassword", "UserManagement", new { id = Model.Id })" class="btn btn-warning btn-sm">
+                            <i class="fas fa-key me-2"></i>Reset Password
+                        </a>
+                        <a href="@Url.Action("Delete", "UserManagement", new { id = Model.Id })" class="btn btn-danger btn-sm">
+                            <i class="fas fa-trash me-2"></i>Delete User
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

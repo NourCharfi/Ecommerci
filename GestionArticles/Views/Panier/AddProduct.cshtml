@@ -1,0 +1,110 @@
+﻿@{
+    ViewBag.Title = "Mon Panier";
+}
+
+<div class="container mt-4">
+    <div class="card mb-4">
+        <div class="card-header primary-header">
+            <h2 class="mb-0">
+                <i class="fas fa-shopping-cart me-2"></i>Mon Panier
+            </h2>
+        </div>
+    </div>
+
+    @* Afficher les messages TempData *@
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-danger">@TempData["ErrorMessage"]</div>
+    }
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success">@TempData["SuccessMessage"]</div>
+    }
+    @if (ViewBag.Liste.Count > 0)
+    {
+        <div class="row">
+            <div class="col-md-8">
+                @foreach (var item in ViewBag.Liste)
+                {
+                    <div class="card mb-3 cart-item" id="row-@item.Prod.ProductId">
+                        <div class="card-body">
+                            <div class="row align-items-center">
+                                <div class="col-md-3">
+                                    <img src="~/images/@item.Prod.Image" 
+                                         class="img-fluid rounded shadow-sm" 
+                                         style="width: 120px; height: 120px; object-fit: cover;"
+                                         alt="@item.Prod.Name">
+                                </div>
+                                <div class="col-md-6">
+                                    <h5 class="card-title">@item.Prod.Name</h5>
+                                    <p class="text-muted">Catégorie: @item.Prod.Category.CategoryName</p>
+                                    <p class="text-muted">Prix unitaire: @item.Prod.Price.ToString("C0")</p>
+                                    
+                                    <div class="d-flex align-items-center mt-3">
+                                        <span class="me-3">Quantité:</span>
+                                        <div class="btn-group" role="group">
+                                            <button class="btn btn-outline-secondary btn-sm MinProducts" 
+                                                    data-id="@item.Prod.ProductId">
+                                                -
+                                            </button>
+                                            <span class="btn btn-light" id="quantite_@item.Prod.ProductId">@item.quantite</span>
+                                            <button class="btn btn-outline-primary btn-sm PlusProducts" 
+                                                    data-id="@item.Prod.ProductId">
+                                                +
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-3 text-end">
+                                    <h5 class="text-success" id="total_@item.Prod.ProductId">@item.TotalPrice.ToString("C0")</h5>
+                                    <button class="btn btn-outline-danger btn-sm RemoveLink" 
+                                            data-id="@item.Prod.ProductId">
+                                        Supprimer
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+            
+            <div class="col-md-4">
+                <div class="card">
+                    <div class="card-header secondary-header">
+                        <h5 class="mb-0">
+                            <i class="fas fa-receipt me-2"></i>Résumé
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between">
+                            <span>Total:</span>
+                            <strong class="text-primary" id="cart-total">@ViewBag.total.ToString("C0")</strong>
+                        </div>
+                        <hr>
+                        <div class="d-grid gap-2">
+                            <a href="~/Panier/Checkout" class="btn btn-success">
+                                Commander
+                            </a>
+                            <a href="~/Product/Index" class="btn btn-outline-secondary">
+                                Continuer mes achats
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+    else
+    {
+        <div class="text-center py-5">
+            <img src="~/images/panier_vide.png" alt="Panier vide" style="width:200px;height:auto;" />
+            <h3 class="mt-3 text-muted">Votre panier est vide !</h3>
+            <p class="text-muted">Découvrez nos produits et trouvez ce qui vous plaît</p>
+            <a href="~/Product/Index" class="btn btn-primary">Voir les produits</a>
+        </div>
+    }
+</div>
+
+@section Scripts {
+    @* Monscript.js is already included in _Layout *@
+}

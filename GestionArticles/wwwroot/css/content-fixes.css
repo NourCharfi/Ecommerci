@@ -1,0 +1,202 @@
+/* CONTENT DISPLAY FIXES - Force content visibility */
+
+/* Reset any potential hiding styles */
+* {
+    visibility: visible !important;
+    display: block !important;
+}
+
+/* Specific overrides for inline elements */
+span, a, button, input, label, i, strong, em {
+    display: inline-block !important;
+}
+
+/* Force main content area */
+main {
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    background-color: #ffffff !important;
+    min-height: 60vh !important;
+    position: relative !important;
+    z-index: 10 !important;
+}
+
+/* Force sections visibility */
+section {
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    background-color: #ffffff !important;
+    min-height: 200px !important;
+    position: relative !important;
+    z-index: 5 !important;
+}
+
+/* Force container visibility */
+.container {
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    position: relative !important;
+    z-index: 15 !important;
+}
+
+/* Force row visibility */
+.row {
+    display: flex !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    flex-wrap: wrap !important;
+}
+
+/* Force column visibility */
+.col, .col-1, .col-2, .col-3, .col-4, .col-5, .col-6, 
+.col-7, .col-8, .col-9, .col-10, .col-11, .col-12,
+.col-lg-1, .col-lg-2, .col-lg-3, .col-lg-4, .col-lg-5, .col-lg-6,
+.col-lg-7, .col-lg-8, .col-lg-9, .col-lg-10, .col-lg-11, .col-lg-12,
+.col-md-1, .col-md-2, .col-md-3, .col-md-4, .col-md-5, .col-md-6,
+.col-md-7, .col-md-8, .col-md-9, .col-md-10, .col-md-11, .col-md-12,
+.col-sm-1, .col-sm-2, .col-sm-3, .col-sm-4, .col-sm-5, .col-sm-6,
+.col-sm-7, .col-sm-8, .col-sm-9, .col-sm-10, .col-sm-11, .col-sm-12 {
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    position: relative !important;
+    z-index: 8 !important;
+}
+
+/* Force card visibility */
+.card {
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    background-color: #ffffff !important;
+    border: 1px solid #e5e7eb !important;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1) !important;
+    position: relative !important;
+    z-index: 6 !important;
+}
+
+/* Force text visibility */
+h1, h2, h3, h4, h5, h6, p, span, div, a, button, label {
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    color: inherit !important;
+    position: relative !important;
+    z-index: 7 !important;
+}
+
+/* Inline elements */
+a, button, span, i, strong, em, small {
+    display: inline-block !important;
+}
+
+/* Force button visibility */
+.btn {
+    display: inline-block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    position: relative !important;
+    z-index: 9 !important;
+}
+
+/* Hero section specific */
+.hero-section {
+    display: flex !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+    color: white !important;
+    padding: 80px 0 !important;
+    min-height: 400px !important;
+    align-items: center !important;
+    position: relative !important;
+    z-index: 5 !important;
+}
+
+/* Force table visibility */
+table, thead, tbody, tr, td, th {
+    display: table !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+}
+
+tr {
+    display: table-row !important;
+}
+
+td, th {
+    display: table-cell !important;
+}
+
+/* Force form elements */
+form, input, select, textarea {
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+}
+
+/* Force image visibility */
+img {
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    max-width: 100% !important;
+    height: auto !important;
+}
+
+/* Override any potential hiding */
+.hidden, .d-none, .invisible {
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+}
+
+/* Force content in main area */
+main > * {
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+}
+
+/* Specific fixes for Category page */
+.category-card {
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    background-color: #ffffff !important;
+    border: 1px solid #e5e7eb !important;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1) !important;
+    margin-bottom: 1rem !important;
+    padding: 1rem !important;
+    border-radius: 8px !important;
+}
+
+/* Force all content to be visible */
+body * {
+    visibility: visible !important;
+}
+
+/* Ensure proper stacking */
+main {
+    z-index: 100 !important;
+}
+
+section {
+    z-index: 90 !important;
+}
+
+.container {
+    z-index: 95 !important;
+}
+
+.card {
+    z-index: 80 !important;
+}
+
+/* Force display for all elements */
+div, section, article, aside, header, footer, nav, main {
+    display: block !important;
+}

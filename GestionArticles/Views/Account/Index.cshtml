@@ -1,0 +1,30 @@
+@using Microsoft.AspNetCore.Identity
+@inject SignInManager<IdentityUser> SignInManager
+@{
+    ViewData["Title"] = "Mon compte";
+}
+
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-12 col-md-8 col-lg-6">
+            <div class="card auth-card p-4 shadow-sm mt-4">
+                <div class="card-body">
+                    <h3 class="mb-3">Mon compte</h3>
+
+                    <p>Connecté en tant que : <strong>@User.Identity?.Name</strong></p>
+
+                    <div class="list-group mb-3">
+                        <a class="list-group-item list-group-item-action" asp-controller="Account" asp-action="Profile">Voir mon profil</a>
+                        <a class="list-group-item list-group-item-action" asp-controller="Account" asp-action="Edit">Modifier mes données</a>
+                    </div>
+
+                    <div>
+                        <form method="post" asp-controller="Account" asp-action="Logout">
+                            <button type="submit" class="btn btn-outline-secondary me-2">Se déconnecter</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
